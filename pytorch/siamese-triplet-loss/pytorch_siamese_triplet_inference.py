@@ -66,22 +66,25 @@ def infer():
             print(ap_distance, an_distance)
 
             cosine_similarity = nn.CosineSimilarity()
-            print(f'Similarity Score between AP: {cosine_similarity(embedding_1, embedding_2)}')
-            print(f'Similarity Score between AP: {cosine_similarity(embedding_1, embedding_3)}')
+            ap_cosine_similarity = cosine_similarity(embedding_1, embedding_2)
+            an_cosine_similarity = cosine_similarity(embedding_1, embedding_3)
+            print(f'Similarity Score between AP: {ap_cosine_similarity}')
+            print(f'Similarity Score between AP: {an_cosine_similarity}')
 
             fig, ax = plt.subplots(nrows, ncols * 3)
             plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
+            k = 0
             for i in range(nrows):
                 m = 0
                 for j in range(ncols):
-                    print(i, j)
-                    ax[i, m].imshow(np.transpose(anchor_image_batch[i + j].detach().cpu().numpy(), (1, 2, 0)))
-                    ax[i, m].text(0.0, -2.0, 'anchor', fontsize=16)
-                    ax[i, m + 1].imshow(np.transpose(postive_image_batch[i + j].detach().cpu().numpy(), (1, 2, 0)))
-                    ax[i, m + 1].text(0.0, -2.0, 'positive', fontsize=16)
-                    ax[i, m + 2].imshow(np.transpose(negative_image_batch[i + j].detach().cpu().numpy(), (1, 2, 0)))
-                    ax[i, m + 2].text(0.0, -2.0, 'negative', fontsize=16)
+                    ax[i, m].imshow(np.transpose(anchor_image_batch[k].detach().cpu().numpy(), (1, 2, 0)))
+                    ax[i, m].text(0.0, -2.0, f'anchor', fontsize=16)
+                    ax[i, m + 1].imshow(np.transpose(postive_image_batch[k].detach().cpu().numpy(), (1, 2, 0)))
+                    ax[i, m + 1].text(0.0, -2.0, f'positive: {ap_cosine_similarity[k]:.2f}', fontsize=16)
+                    ax[i, m + 2].imshow(np.transpose(negative_image_batch[k].detach().cpu().numpy(), (1, 2, 0)))
+                    ax[i, m + 2].text(0.0, -2.0, f'negative: {an_cosine_similarity[k]:.2f}', fontsize=16)
                     m += 3
+                    k += 1
             plt.show()
 
 
