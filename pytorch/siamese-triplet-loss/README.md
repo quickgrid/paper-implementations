@@ -6,7 +6,9 @@ Current implementation is tested on `MNIST`. `ResNet18` is backbone for transfer
 
 Few epochs should be enough to get a good enough result on MNIST dataset.
 
-This is an extension of [siamese network implementation](https://github.com/quickgrid/code-lab/blob/master/code-lab/pytorch/pytorch_siamese_network.py) I tried. I used training sample of following mnist dataset, https://www.kaggle.com/scolianni/mnistasjpg.
+This is an extension of [siamese network implementation](https://github.com/quickgrid/code-lab/blob/master/code-lab/pytorch/pytorch_siamese_network.py) I tried to implement. 
+
+For MNIST following dataset was used, https://www.kaggle.com/scolianni/mnistasjpg.
 
 ## Results
 
