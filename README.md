@@ -36,7 +36,7 @@ Implementation of various AI papers with related sections, notes, comments etc. 
 | **Image Segmentation** | [U-Net: Convolutional Networks for Biomedical Image Segmentation (UNet)](pytorch/u-net) |
 |  |  |
 | **Verification, Recognition, Clutering** | [FaceNet: A Unified Embedding for Face Recognition and Clustering (Triplet Loss)](pytorch/siamese-triplet-loss) |
-|  | [Siamese Neural Networks for One-shot Image Recognition](pytorch/siamese-contrastive-loss) |
+|  | [Siamese Neural Networks for One-shot Image Recognition](pytorch/siamese-contrastive-loss) <br> [Dimensionality Reduction by Learning an Invariant Mapping (Contrastive Loss)](pytorch/siamese-contrastive-loss) |
 |  |  |
 | **Implicit Representations** | [Implicit Neural Representations with Periodic Activation Functions (SIREN)](pytorch/siren) |
 
