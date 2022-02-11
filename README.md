@@ -1,6 +1,6 @@
 # Paper-Implementations
 
-Implementation of various AI papers with related sections, notes, comments etc.
+Implementation of various AI papers with related sections, notes, comments etc. These implementations are not meant to be exact.
 <br>
 
 
