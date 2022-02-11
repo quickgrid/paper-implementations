@@ -31,7 +31,7 @@ Implementation of various AI papers with related sections, notes, comments etc.
 |  | [Wasserstein GAN (WGAN)](pytorch/wgan) |
 |  | [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
 |  |  |
-| **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks](pytorch/neural-style-transfer) |
+| **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
 | **Image Segmentation** | [U-Net: Convolutional Networks for Biomedical Image Segmentation (UNet)](pytorch/u-net) |
 |  |  |
