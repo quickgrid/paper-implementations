@@ -1,8 +1,8 @@
 ## Notes
 
-Implementation of siamese network with contrastive loss. Only tested on mnist though it should work on other datasets. 
+Implementation of `siamese network with contrastive loss`. Only tested on `mnist` though it should work on other datasets. Training converged quickly when parameters were not frozen. Loss comes down steadly and may flucture somewhat then again come down.
 
-Training converged quickly when parameters were not frozen. Loss comes down steadly and make flucture somewhat then again come down.
+This version has checkpoint loading for resuming training. It can passed to trainer with `checkpoint_path`.
 
 This is an extension of [siamese network with triplet loss](https://github.com/quickgrid/paper-implementations/blob/main/pytorch/siamese-triplet-loss) training and inference. 
 
