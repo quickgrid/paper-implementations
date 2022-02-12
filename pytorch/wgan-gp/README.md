@@ -1,6 +1,6 @@
 ## Notes
 
-It takes quite some time to train. On `LEARNING_RATE=5=1e-4`, `BATCH_SIZE=64` it took around 25 steps to produce some minimal quality results on `CelebA HQ` whole dataset. Initial result may lead to believe that model is not training. Both generator and critic loss can be negative. I see this based on per mini batch generator and critic loss. 
+It takes quite some time to train. On `LEARNING_RATE=5=1e-4`, `BATCH_SIZE=64` it took around 40 epochs to produce some minimal quality results on `CelebA HQ` whole dataset. Initial result may lead to believe that model is not training. Both generator and critic loss can be negative. I see this based on per mini batch generator and critic loss. 
 
 Assuming tensorboard is installed with tensorflow or separately. Monitoring progress in tensorboard in windows,
 
@@ -8,7 +8,7 @@ Assuming tensorboard is installed with tensorflow or separately. Monitoring prog
 tensorboard --logdir=C:\GAN\logs --host localhost --port 8088
 ```
 
-In browser head to, http://localhost:8088/ to see tensorboard.
+In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\logs` with the location of this code where `logs` folder is generated.
 
 <br>
 
