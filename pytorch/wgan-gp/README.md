@@ -1,6 +1,6 @@
 ## Notes
 
-It takes quite some time to train. On `LEARNING_RATE=5=1e-4`, `BATCH_SIZE=64` it took around 40 epochs to produce some minimal quality results on `CelebA HQ` whole dataset. Initial result may lead to believe that model is not training. Both generator and critic loss can be negative. I see this based on per mini batch generator and critic loss. 
+It takes quite some time to train. On `LEARNING_RATE=5=1e-4`, `BATCH_SIZE=64` it took around 40 epochs to produce some minimal quality results on `CelebA HQ` whole dataset. Initial result may lead to believe that model is not training. Both generator and critic loss can be negative. I see this based on per mini batch generator and critic loss. Training was done on a small subset of `celeba-hq` dataset.
 
 Assuming tensorboard is installed with tensorflow or separately. Monitoring progress in tensorboard in windows,
 
