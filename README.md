@@ -30,6 +30,7 @@ Implementation of various AI papers with related sections, notes, comments etc. 
 |  | [Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks (DCGAN)](pytorch/dcgan) |
 |  | [Wasserstein GAN (WGAN)](pytorch/wgan) |
 |  | [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
+|  | [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
