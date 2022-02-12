@@ -15,7 +15,8 @@ Training can be monitored on tensorboard. Instruction can be found on `wgan-gp` 
 
 ## Results
 
-<img src="results/conditional_wgan_mnist.gif" width=45% height=45%>
+<img src="results/conditional_wgan_mnist.gif" width=45% height=45%> <img src="results/conditional_wgan_rgb.png" width=45% height=45%>
+
 
 ### Conditional Generation with User Input
 
