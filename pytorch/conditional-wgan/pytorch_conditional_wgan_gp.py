@@ -115,7 +115,7 @@ class CustomImageDataset(Dataset):
         self.class_list = os.listdir(root_dir)
 
         self.transform = transforms.Compose([
-            transforms.Resize(image_size),
+            transforms.Resize((image_size, image_size)),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.5 for _ in range(image_channels)],
@@ -327,7 +327,8 @@ class Trainer:
 
 if __name__ == '__main__':
     trainer = Trainer(
-        root_dir=r'dataset\mnist_sample',
+        root_dir=r'staging/data',
         device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+        # checkpoint_path='checkpoints/checkpoint_7.pt'
     )
     trainer.train()
