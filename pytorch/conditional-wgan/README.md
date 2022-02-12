@@ -6,7 +6,7 @@ Training can be monitored on tensorboard. Instruction can be found on `wgan-gp` 
 
 ## Results
 
-<img src="results/conditional_wgan_mnist.gif" width=50% height=50%>
+<img src="results/conditional_wgan_mnist.gif" width=45% height=45%>
 
 ### Generated and Real
 
@@ -14,7 +14,8 @@ Training can be monitored on tensorboard. Instruction can be found on `wgan-gp` 
 
 ## Todo
 
-- [ ] Test to see if works on other datasets.
+- Test to see if works on other datasets.
+- Add checkpoint saving and reload code from wgap-gp implementation.
 
 ## References
 
