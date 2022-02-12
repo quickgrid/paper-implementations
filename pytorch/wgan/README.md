@@ -15,7 +15,9 @@ In browser head to, http://localhost:8088/ to see tensorboard.
 
 ## Results
 
-![WGAN CelebA HQ Generated](results/wgan_celeba_hq.gif "WGAN CelebA HQ Generated")
+![WGAN CelebA HQ Generated](results/wgan_celeba_hq_1.gif "WGAN CelebA HQ Generated")
+
+![WGAN CelebA HQ Generated](results/wgan_celeba_hq_2.gif "WGAN CelebA HQ Generated")
 
 <br>
 

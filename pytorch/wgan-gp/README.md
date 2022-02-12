@@ -14,7 +14,7 @@ In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\
 
 ## Results
 
-![WGAN CelebA HQ Generated](results/wgan_gp_celeba_hq.gif "WGAN CelebA HQ Generated")
+![WGAN CelebA HQ Generated](results/pytorch_wgan_gp_celeba_hq.gif "WGAN CelebA HQ Generated")
 
 <br>
 
