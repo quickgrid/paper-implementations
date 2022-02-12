@@ -3,6 +3,7 @@
 Notes
     - Test on other datasets.
     - Understand more clearly and simplify code.
+    - Find a way to remove `drop_last` and correct implementation of save every N steps.
 
 References
     - WGAN and WGAN-GP implementation, https://www.youtube.com/watch?v=pG0QZ7OddX4.
@@ -13,6 +14,7 @@ References
 """
 
 import os
+import pathlib
 
 import torch
 import torch.nn as nn
@@ -159,6 +161,8 @@ class Trainer:
             self,
             root_dir='',
             device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+            checkpoint_path: str = None,
+            save_checkpoint_every: int = 20,
             num_workers: int = 0,
             batch_size: int = 64,
             image_size: int = 64,
@@ -183,6 +187,7 @@ class Trainer:
         self.Z_DIM = z_dim
         self.num_classes = num_classes
         self.gen_class_embed_size = gen_class_embed_size
+        self.save_checkpoint_every = save_checkpoint_every
 
         gan_dataset = CustomImageDataset(root_dir=root_dir, image_size=image_size, image_channels=image_channels)
         self.train_loader = DataLoader(
@@ -231,6 +236,11 @@ class Trainer:
         self.writer_fake = SummaryWriter(f"logs/fake")
         self.step = 0
 
+        self.start_epoch = 0
+        pathlib.Path('checkpoints').mkdir(parents=True, exist_ok=True)
+        if checkpoint_path is not None:
+            self.load_checkpoint(checkpoint_path=checkpoint_path)
+
     def get_gradient_penalty(self, real, fake, labels):
         batch_size, c, h, w = real.shape
         epsilon = torch.rand((batch_size, 1, 1, 1), device=self.device).repeat(1, c, h, w)
@@ -249,8 +259,16 @@ class Trainer:
         gradient_penalty = torch.mean((gradient_norm - 1) ** 2)
         return gradient_penalty
 
+    def load_checkpoint(self, checkpoint_path: str) -> None:
+        checkpoint = torch.load(checkpoint_path)
+        self.G.load_state_dict(checkpoint['generator_state_dict'])
+        self.opt_G.load_state_dict(checkpoint['generator_optimizer_state_dict'])
+        self.C.load_state_dict(checkpoint['critic_state_dict'])
+        self.opt_C.load_state_dict(checkpoint['critic_optimizer_state_dict'])
+        self.start_epoch = checkpoint['epoch']
+
     def train(self):
-        for epoch in range(self.NUM_EPOCHS):
+        for epoch in range(self.start_epoch, self.NUM_EPOCHS):
             for batch_idx, (real, labels) in enumerate(self.train_loader):
                 real = real.to(self.device)
                 current_batch_size = real.shape[0]
@@ -281,7 +299,15 @@ class Trainer:
                 loss_gen.backward()
                 self.opt_G.step()
 
-                if batch_idx % 10 == 0:
+                if batch_idx % self.save_checkpoint_every == 0:
+                    torch.save({
+                        'epoch': epoch,
+                        'generator_state_dict': self.G.state_dict(),
+                        'critic_state_dict': self.C.state_dict(),
+                        'generator_optimizer_state_dict': self.opt_G.state_dict(),
+                        'critic_optimizer_state_dict': self.opt_C.state_dict(),
+                    }, f'checkpoints/checkpoint_{epoch}.pt')
+
                     self.G.eval()
                     self.C.eval()
                     print(
