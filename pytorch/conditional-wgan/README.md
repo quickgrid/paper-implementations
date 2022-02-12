@@ -6,6 +6,12 @@ Training can be monitored on tensorboard. Instruction can be found on `wgan-gp` 
 
 ## Results
 
+<img src="results/conditional_wgan_mnist.gif" width=50% height=50%>
+
+### Generated and Real
+
+<img src="results/conditional_generated.png" width=45% height=50%> <img src="results/ground_truth.png" width=45% height=50%>
+
 ## Todo
 
 - [ ] Test to see if works on other datasets.
