@@ -6,6 +6,12 @@ Training can be monitored on tensorboard. Instruction can be found on `wgan-gp` 
 
 ## Results
 
+![MNIST images](results/conditional_wgan_mnist.gif "Generated Fake MNIST Images")
+
+![Generated Fake MNIST Images](results/conditional_generated.png "Generated Fake MNIST Images")
+![Real MNIST Images](results/ground_truth.png "MNIST real Images")
+
+
 ## Todo
 
 - [ ] Test to see if works on other datasets.
