@@ -123,12 +123,6 @@ class CustomImageDataset(Dataset):
             )
         ])
 
-        # class_name_to_idx = dict()
-        # idx_to_class_name = dict()
-        # for idx, class_name_folder in enumerate(self.class_list):
-        #     class_name_to_idx[class_name_folder] = idx
-        #     idx_to_class_name[idx] = class_name_folder
-
         self.image_labels_files_list = list()
         for idx, class_name_folder in enumerate(self.class_list):
             class_path = os.path.join(root_dir, class_name_folder)
@@ -142,8 +136,6 @@ class CustomImageDataset(Dataset):
                 )
 
         self.image_files_list_len = len(self.image_labels_files_list)
-        # print(self.image_labels_files_list)
-        # print(len(self.image_labels_files_list))
 
     def __len__(self):
         return self.image_files_list_len
