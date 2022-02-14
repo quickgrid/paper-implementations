@@ -138,8 +138,8 @@ class ClassificationMLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.flatten(x)
-        class_probabilities = self.class_mapping_head(x)
-        return class_probabilities
+        x = self.class_mapping_head(x)
+        return x
 
 
 class VisionTransformerModel(nn.Module):
