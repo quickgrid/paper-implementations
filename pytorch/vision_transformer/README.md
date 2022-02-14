@@ -2,11 +2,11 @@
 
 Trained on small subset of `MNIST` greyscale images. Also trained on `6000` images of `person, cat, car` with `2000` images each. Tested with `image_size=32, patch_size=8` and `image_size=72, patch_size=6`.
 
-In sample gif below, `true` labels for the classes are `[car, cat, person] = [0, 1, 2]`.
-
 By providing `checkpoint_path` it will resume training from last point. Seems to produce acceptable result within a few epochs without pretraining.
 
-Directory structure for running code should be,
+### Data Format
+
+In sample gif below, `true` labels for the classes are `[car, cat, person] = [0, 1, 2]`. Directory structure for running code should be,
 
 ```
 dataset_path
@@ -24,6 +24,17 @@ dataset_path
     ...
   ...
 ```
+
+### Monitoring Progress
+
+Assuming tensorboard is installed with tensorflow or separately. Monitoring progress in tensorboard in windows,
+
+```
+tensorboard --logdir=C:\GAN\logs --host localhost --port 8088
+```
+
+In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\logs` with the location of this code where `logs` folder is generated.
+
 
 
 ## Results
