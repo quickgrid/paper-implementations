@@ -34,6 +34,8 @@ Implementation of various AI papers with related sections, notes, comments etc. 
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
+| **Vision Transformer** | [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (ViT)](pytorch/vision_transformer) |
+|  |  |
 | **Image Segmentation** | [U-Net: Convolutional Networks for Biomedical Image Segmentation (UNet)](pytorch/u-net) |
 |  |  |
 | **Verification, Recognition, Clutering** | [FaceNet: A Unified Embedding for Face Recognition and Clustering (Triplet Loss)](pytorch/siamese-triplet-loss) |
