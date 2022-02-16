@@ -1,15 +1,17 @@
 """Implementation of Vision Transformer (ViT) in pytorch.
 
-Notes
+TODO
     - Add learnable class token embedding.
-    - Remove `drop_last` for smaller datasets.
+    - Remove `drop_last` for datasets.
     - Add accuracy logic print and in tensorboard.
     - Add loss data to tensorboard.
+    - Add train validation split with validation loss.
 
 References
     - https://keras.io/examples/vision/image_classification_with_vision_transformer/.
     - https://github.com/lucidrains/vit-pytorch/blob/main/vit_pytorch/vit.py.
     - https://github.com/jeonsworld/ViT-pytorch/blob/main/models/modeling.py.
+    - https://docs.microsoft.com/en-us/windows/ai/windows-ml/tutorials/pytorch-analysis-train-model.
 """
 
 import os
@@ -33,9 +35,8 @@ class VisionTransformerDataset(Dataset):
             image_channels: int,
     ) -> None:
         super(VisionTransformerDataset, self).__init__()
-        self.root_dir = root_dir
-        self.class_list = os.listdir(root_dir)
-        print(self.class_list)
+        _class_list = os.listdir(root_dir)
+        print(_class_list)
 
         self.transform = transforms.Compose([
             transforms.Resize((image_size, image_size)),
@@ -47,7 +48,7 @@ class VisionTransformerDataset(Dataset):
         ])
 
         self.image_labels_files_list = list()
-        for idx, class_name_folder in enumerate(self.class_list):
+        for idx, class_name_folder in enumerate(_class_list):
             class_path = os.path.join(root_dir, class_name_folder)
             files_list = os.listdir(class_path)
             for image_file in files_list:
@@ -81,8 +82,8 @@ class TransformerEncoderModel(nn.Module):
     ) -> None:
         super(TransformerEncoderModel, self).__init__()
         self.multihead_attn = nn.MultiheadAttention(embed_dim=embedding_dim, num_heads=num_heads, dropout=0.1)
-        # self.layer_norm = nn.LayerNorm(embedding_dim)
-        self.layer_norm = nn.InstanceNorm1d(embedding_dim)
+        # self.normalizer = nn.LayerNorm(embedding_dim)
+        self.normalizer = nn.InstanceNorm1d(embedding_dim)
         self.mlp = nn.Sequential(
             nn.Linear(in_features=embedding_dim, out_features=mlp_hidden_dim),
             nn.GELU(),
@@ -92,10 +93,11 @@ class TransformerEncoderModel(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x_skip = self.layer_norm(x)
-        attn_output, attn_output_weights = self.multihead_attn(query=x, key=x, value=x)
+        x_skip = x
+        x = self.normalizer(x)
+        attn_output, attn_output_weights = self.multihead_attn(x, x, x)
         x_skip = attn_output + x_skip
-        x = self.layer_norm(x_skip)
+        x = self.normalizer(x_skip)
         x = self.mlp(x) + x_skip
         return x
 
@@ -105,22 +107,15 @@ class PatchPositionEncoder(nn.Module):
             self,
             num_patches: int,
             embedding_dim: int,
-            device: torch.device,
     ) -> None:
         super(PatchPositionEncoder, self).__init__()
+        self.patch_embeddings = nn.LazyLinear(out_features=embedding_dim)
+        self.position_embeddings = nn.Parameter(torch.zeros(1, num_patches, embedding_dim))
         # self.class_token = nn.Parameter(torch.randn(1, 1, embedding_dim))
-        self.device = device
-
-        # self.num_patches = num_patches + 1  # Remove +1 to remove class token.
-        self.num_patches = num_patches
-        self.patch_embedding = nn.LazyLinear(out_features=embedding_dim)
-        self.position_embedding = nn.Embedding(num_embeddings=num_patches, embedding_dim=embedding_dim)
-        self.positions = torch.arange(start=0, end=self.num_patches, step=1, dtype=torch.int, device=self.device)
 
     def forward(self, patch: torch.Tensor) -> torch.Tensor:
-        patch_e = self.patch_embedding(patch)
-        # patch_e = torch.cat([self.class_token, patch_e], dim=1)     # Disable this for removing class token.
-        pos_e = self.position_embedding(self.positions)
+        patch_e = self.patch_embeddings(patch)
+        pos_e = self.position_embeddings
         encoding = patch_e + pos_e
         return encoding
 
@@ -149,28 +144,24 @@ class VisionTransformerModel(nn.Module):
             embedding_dim: int,
             transformer_layers_count: int,
             num_patches: int,
-            device: torch.device,
     ) -> None:
         super(VisionTransformerModel, self).__init__()
 
-        self.transformer_layers_count = transformer_layers_count
-        self.transformer_layers = nn.ModuleList()
+        _patch_encoder = PatchPositionEncoder(
+            num_patches=num_patches,
+            embedding_dim=embedding_dim,
+        )
 
+        _vision_transformer_modules = [_patch_encoder]
         for _ in range(transformer_layers_count):
-            self.transformer_layers.append(
+            _vision_transformer_modules.append(
                 TransformerEncoderModel(num_heads=num_heads, embedding_dim=embedding_dim),
             )
 
-        self.patch_encoder = PatchPositionEncoder(
-            num_patches=num_patches,
-            embedding_dim=embedding_dim,
-            device=device,
-        )
+        self.vision_transformer_layers = nn.Sequential(*_vision_transformer_modules)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.patch_encoder(x)
-        for transformer_layer in self.transformer_layers:
-            x = transformer_layer(x)
+        x = self.vision_transformer_layers(x)
         return x
 
 
@@ -197,13 +188,7 @@ class Trainer:
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.save_every = save_every
-        self.num_workers = num_workers
         self.patch_size = patch_size
-        self.learning_rate = learning_rate
-        self.image_channels = image_channels
-        self.num_heads = num_heads
-        self.patch_embedding_dim = patch_embedding_dim
-        self.transformer_layers_count = transformer_layers_count
 
         self.patch_count = (image_size // patch_size) ** 2
         num_classes = len(os.listdir(dataset_path))
@@ -218,26 +203,26 @@ class Trainer:
             batch_size=batch_size,
             shuffle=True,
             num_workers=num_workers,
-            drop_last=True,
+            pin_memory=True,
+            drop_last=True,  # Unable to train without this why?
         )
 
         self.vit_model = VisionTransformerModel(
-            num_heads=self.num_heads,
-            embedding_dim=self.patch_embedding_dim,
-            transformer_layers_count=self.transformer_layers_count,
-            device=self.device,
+            num_heads=num_heads,
+            embedding_dim=patch_embedding_dim,
+            transformer_layers_count=transformer_layers_count,
             num_patches=self.patch_count,
         )
         self.mlp_head = ClassificationMLP(
             num_classes=num_classes,
-            embedding_dim=self.patch_embedding_dim,
+            embedding_dim=patch_embedding_dim,
             patch_count=self.patch_count,
         )
 
         self.vit_model.to(self.device)
         self.mlp_head.to(self.device)
 
-        self.optim = torch.optim.Adam(params=self.vit_model.parameters(), lr=self.learning_rate)
+        self.optim = torch.optim.Adam(params=self.vit_model.parameters(), lr=learning_rate)
         self.loss_fn = nn.CrossEntropyLoss()
 
         self.writer_predictions = SummaryWriter(f"logs/predictions")
@@ -260,9 +245,8 @@ class Trainer:
 
     def train(self) -> None:
         for epoch in range(self.start_epoch, self.num_epochs):
-            train_loss = 0.0
-            # correct_preds = 0
-            # num_samples = 0
+            # Training loop.
+            running_train_loss = 0.0
             for idx, (img, labels) in enumerate(self.train_loader):
                 img = img.to(self.device)
                 labels = labels.to(self.device)
@@ -281,8 +265,10 @@ class Trainer:
                 loss.backward()
                 self.optim.step()
 
+                running_train_loss += loss.item()
+
                 with torch.no_grad():
-                    if idx % self.save_every == 0:
+                    if idx % self.save_every == self.save_every - 1:
                         torch.save({
                             'epoch': epoch,
                             'vit_model_state_dict': self.vit_model.state_dict(),
@@ -293,16 +279,11 @@ class Trainer:
                         self.vit_model.eval()
                         self.mlp_head.eval()
 
-                        # correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
-                        # num_samples += predicted_labels.shape[0]
-
-                        train_loss += loss.item() * img.size(0)
-                        train_loss /= len(self.train_loader)
                         print(
-                            f"EPOCH: [{epoch} / {self.num_epochs}], BATCH: [{idx} / {len(self.train_loader)}],",
-                            f"LOSS(Mean): {train_loss:.4f}",
-                            # f"ACCURACY: {(100 * float(correct_preds) / num_samples):.2f}"
+                            f"EPOCH: [{epoch + 1} / {self.num_epochs}], BATCH: [{idx + 1} / {len(self.train_loader)}],",
+                            f"LOSS: {running_train_loss / self.save_every:.4f}",
                         )
+                        running_train_loss = 0.0
 
                         fig, ax = plt.subplots(nrows=self.nrows, ncols=self.ncols)
                         plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
@@ -321,13 +302,15 @@ class Trainer:
 
                         self.writer_predictions.add_figure('Real vs Pred', figure=fig, global_step=self.step)
                         self.step += 1
+
                         self.vit_model.train(True)
                         self.mlp_head.train(True)
 
+            # TODO: Validation loop.
 
 if __name__ == '__main__':
     trainer = Trainer(
-        dataset_path=r'C:\staging\data',
+        dataset_path=r'C:\portable\staging\classification_data',
         # checkpoint_path='checkpoints/checkpoint_18.pt',
     )
     trainer.train()
