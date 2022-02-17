@@ -2,7 +2,9 @@
 
 Implementation attempts of various AI papers in simple form etc. These implementations are not meant to be exact and are categorized into a general section.
 
-This repository is primarily for my learning purposes. Codes may be incomplete and will likely have bugs. If there are any bugs, mistakes, or general suggestions please don't hesitate to point out.
+This repository is primarily for my learning purposes. If there are any bugs, mistakes please don't hesitate to point out.
+
+**WARNING: Codes may be incomplete, will likely have bugs, mistakes or plain wrong due to lack of proper understanding. Use at own risk.**
 
 <!--
 ## Table of Contents
