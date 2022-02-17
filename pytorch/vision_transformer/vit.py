@@ -35,7 +35,7 @@ class VisionTransformerDataset(Dataset):
             image_channels: int,
     ) -> None:
         super(VisionTransformerDataset, self).__init__()
-        _class_list = os.listdir(root_dir)
+        class_list = os.listdir(root_dir)
 
         self.transform = transforms.Compose([
             transforms.Resize((image_size, image_size)),
@@ -47,7 +47,7 @@ class VisionTransformerDataset(Dataset):
         ])
 
         self.image_labels_files_list = list()
-        for idx, class_name_folder in enumerate(_class_list):
+        for idx, class_name_folder in enumerate(class_list):
             class_path = os.path.join(root_dir, class_name_folder)
             files_list = os.listdir(class_path)
             for image_file in files_list:
@@ -150,18 +150,18 @@ class VisionTransformerModel(nn.Module):
         self.patch_count = patch_count
         self.patch_size = patch_size
 
-        _patch_encoder = PatchPositionEncoder(
+        patch_encoder = PatchPositionEncoder(
             num_patches=num_patches,
             embedding_dim=embedding_dim,
         )
 
-        _vision_transformer_modules = [_patch_encoder]
+        vision_transformer_modules = [patch_encoder]
         for _ in range(transformer_layers_count):
-            _vision_transformer_modules.append(
+            vision_transformer_modules.append(
                 TransformerEncoderModel(num_heads=num_heads, embedding_dim=embedding_dim),
             )
 
-        self.vision_transformer_layers = nn.Sequential(*_vision_transformer_modules)
+        self.vision_transformer_layers = nn.Sequential(*vision_transformer_modules)
 
     def forward(self, img: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
@@ -207,23 +207,26 @@ class Trainer:
         num_classes = len(class_names)
 
         def _dataset_split():
-            vit_dataset = VisionTransformerDataset(
+            _vit_dataset = VisionTransformerDataset(
                 root_dir=dataset_path,
                 image_channels=image_channels,
                 image_size=image_size,
             )
             if validation_dataset_path is None:
-                train_size = int(train_split_percentage * len(vit_dataset))
-                test_size = len(vit_dataset) - train_size
-                train_set, validation_set = torch.utils.data.random_split(vit_dataset, [train_size, test_size])
-                return train_set, validation_set
+                _train_size = int(train_split_percentage * len(_vit_dataset))
+                _test_size = len(_vit_dataset) - _train_size
+                _train_dataset, _validation_dataset = torch.utils.data.random_split(
+                    _vit_dataset,
+                    [_train_size, _test_size]
+                )
+                return _train_dataset, _validation_dataset
             else:
-                validation_set = VisionTransformerDataset(
+                _validation_dataset = VisionTransformerDataset(
                     root_dir=validation_dataset_path,
                     image_channels=image_channels,
                     image_size=image_size,
                 )
-                return vit_dataset, validation_set
+                return _vit_dataset, _validation_dataset
 
         train_dataset, validation_dataset = _dataset_split()
 
