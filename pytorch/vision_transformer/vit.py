@@ -127,12 +127,14 @@ class ClassificationMLP(nn.Module):
             patch_count: int,
     ) -> None:
         super(ClassificationMLP, self).__init__()
-        self.flatten = nn.Flatten()
-        self.class_mapping_head = nn.Linear(in_features=embedding_dim * (patch_count + 1), out_features=num_classes)
+
+        self.class_mapping_layer = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(in_features=embedding_dim * (patch_count + 1), out_features=num_classes),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.flatten(x)
-        x = self.class_mapping_head(x)
+        x = self.class_mapping_layer(x)
         return x
 
 
@@ -182,7 +184,7 @@ class Trainer:
             validation_dataset_path: str = None,
             checkpoint_path: str = None,
             device: str = None,
-            train_split_percentage: float = 0.6,
+            train_split_percentage: float = 0.02,
             num_epochs: int = 1000,
             batch_size: int = 64,
             save_every: int = 20,
@@ -293,6 +295,9 @@ class Trainer:
             training_correct_preds = 0
             training_total_data = 0
             tqdm_train_loader = tqdm(self.train_loader)
+            tqdm_train_loader.set_description(
+                f'TRAIN EPOCH: {epoch} '
+            )
             for idx, (img, labels) in enumerate(tqdm_train_loader):
                 img = img.to(self.device)
                 labels = labels.to(self.device)
@@ -309,10 +314,6 @@ class Trainer:
                 training_total_data += img.shape[0]
                 training_correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
 
-                tqdm_train_loader.set_description(
-                    f'TRAIN EPOCH: {epoch} '
-                )
-
             # Validation loop.
             running_validation_loss = 0.0
             validation_correct_preds = 0
@@ -321,6 +322,9 @@ class Trainer:
                 self.vit_model.eval()
                 self.mlp_head.eval()
                 tqdm_validation_loader = tqdm(self.validation_loader)
+                tqdm_validation_loader.set_description(
+                    f'VALID EPOCH: {epoch} '
+                )
                 for idx, (img, labels) in enumerate(tqdm_validation_loader):
                     img = img.to(self.device)
                     labels = labels.to(self.device)
@@ -333,10 +337,6 @@ class Trainer:
                     running_validation_loss += validation_loss.item()
                     validation_total_data += img.shape[0]
                     validation_correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
-
-                    tqdm_validation_loader.set_description(
-                        f'VALID EPOCH: {epoch} '
-                    )
 
                     if idx % self.save_every == self.save_every - 1:
                         fig, ax = plt.subplots(nrows=self.nrows, ncols=self.ncols)
