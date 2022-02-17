@@ -1,8 +1,8 @@
 # Paper-Implementations
 
-Implementation of various AI papers with related sections, notes, comments etc. These implementations are not meant to be exact.
-<br>
+Implementation attempts of various AI papers in simple form etc. These implementations are not meant to be exact and are categorized into a general section.
 
+This repository is primarily for my learning purposes. Codes may be incomplete and will likely have bugs. If there are any bugs, mistakes, or general suggestions please don't hesitate to point out.
 
 <!--
 ## Table of Contents
@@ -58,8 +58,3 @@ Implementation of various AI papers with related sections, notes, comments etc. 
 Papers links are available here, https://github.com/quickgrid/AI-Resources/blob/master/papers.md.
 
 
-## About
-
-This repository is primarily for my learning purposes. Some codes may be incomplete and may have bugs. If there are any bugs, mistakes, or general suggestions please don't hesitate to point out.
-
-Usually papers contain contain contents from many different categories. To keep things simple they are categorized under a general section.
