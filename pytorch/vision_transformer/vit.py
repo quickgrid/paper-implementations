@@ -297,9 +297,6 @@ class Trainer:
                     f'TRAIN EPOCH: {epoch} '
                 )
 
-            train_loss_value = running_train_loss / len(self.train_loader)
-            training_accuracy = (100.0 * training_correct_preds / training_total_data)
-
             # Validation loop.
             running_validation_loss = 0.0
             validation_correct_preds = 0
@@ -348,6 +345,8 @@ class Trainer:
                 self.vit_model.train()
                 self.mlp_head.train()
 
+            train_loss_value = running_train_loss / len(self.train_loader)
+            training_accuracy = (100.0 * training_correct_preds / training_total_data)
             validation_loss_value = running_validation_loss / len(self.validation_loader)
             validation_accuracy = (100.0 * validation_correct_preds / validation_total_data)
 
