@@ -179,9 +179,10 @@ class Trainer:
     def __init__(
             self,
             dataset_path: str,
+            validation_dataset_path: str = None,
             checkpoint_path: str = None,
             device: str = None,
-            train_split_percentage: float = 0.2,
+            train_split_percentage: float = 0.6,
             num_epochs: int = 1000,
             batch_size: int = 64,
             save_every: int = 20,
@@ -201,18 +202,30 @@ class Trainer:
         self.save_every = save_every
         self.patch_size = patch_size
 
-        self.patch_count = (image_size // patch_size) ** 2
+        patch_count = (image_size // patch_size) ** 2
         class_names = os.listdir(dataset_path)
         num_classes = len(class_names)
 
-        vit_dataset = VisionTransformerDataset(
-            root_dir=dataset_path,
-            image_channels=image_channels,
-            image_size=image_size,
-        )
-        train_size = int(train_split_percentage * len(vit_dataset))
-        test_size = len(vit_dataset) - train_size
-        train_dataset, validation_dataset = torch.utils.data.random_split(vit_dataset, [train_size, test_size])
+        def _dataset_split():
+            vit_dataset = VisionTransformerDataset(
+                root_dir=dataset_path,
+                image_channels=image_channels,
+                image_size=image_size,
+            )
+            if validation_dataset_path is None:
+                train_size = int(train_split_percentage * len(vit_dataset))
+                test_size = len(vit_dataset) - train_size
+                train_set, validation_set = torch.utils.data.random_split(vit_dataset, [train_size, test_size])
+                return train_set, validation_set
+            else:
+                validation_set = VisionTransformerDataset(
+                    root_dir=validation_dataset_path,
+                    image_channels=image_channels,
+                    image_size=image_size,
+                )
+                return vit_dataset, validation_set
+
+        train_dataset, validation_dataset = _dataset_split()
 
         self.train_loader = DataLoader(
             dataset=train_dataset,
@@ -235,14 +248,14 @@ class Trainer:
             num_heads=num_heads,
             embedding_dim=patch_embedding_dim,
             transformer_layers_count=transformer_layers_count,
-            num_patches=self.patch_count,
+            num_patches=patch_count,
             patch_size=patch_size,
-            patch_count=self.patch_count,
+            patch_count=patch_count,
         )
         self.mlp_head = ClassificationMLP(
             num_classes=num_classes,
             embedding_dim=patch_embedding_dim,
-            patch_count=self.patch_count,
+            patch_count=patch_count,
         )
 
         self.vit_model.to(self.device)
