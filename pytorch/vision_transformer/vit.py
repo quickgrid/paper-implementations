@@ -184,7 +184,7 @@ class Trainer:
             validation_dataset_path: str = None,
             checkpoint_path: str = None,
             device: str = None,
-            train_split_percentage: float = 0.02,
+            train_split_percentage: float = 0.6,
             num_epochs: int = 1000,
             batch_size: int = 64,
             save_every: int = 20,
@@ -294,25 +294,23 @@ class Trainer:
             running_train_loss = 0.0
             training_correct_preds = 0
             training_total_data = 0
-            tqdm_train_loader = tqdm(self.train_loader)
-            tqdm_train_loader.set_description(
-                f'TRAIN EPOCH: {epoch} '
-            )
-            for idx, (img, labels) in enumerate(tqdm_train_loader):
-                img = img.to(self.device)
-                labels = labels.to(self.device)
+            with tqdm(self.train_loader) as tqdm_train_loader:
+                tqdm_train_loader.set_description(f'TRAIN EPOCH: {epoch} ')
+                for idx, (img, labels) in enumerate(tqdm_train_loader):
+                    img = img.to(self.device)
+                    labels = labels.to(self.device)
 
-                vit_output = self.vit_model(img)
-                predicted_labels = self.mlp_head(vit_output)
+                    vit_output = self.vit_model(img)
+                    predicted_labels = self.mlp_head(vit_output)
 
-                self.optim.zero_grad()
-                loss = self.loss_fn(predicted_labels, labels)
-                loss.backward()
-                self.optim.step()
+                    self.optim.zero_grad()
+                    loss = self.loss_fn(predicted_labels, labels)
+                    loss.backward()
+                    self.optim.step()
 
-                running_train_loss += loss.item()
-                training_total_data += img.shape[0]
-                training_correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
+                    running_train_loss += loss.item()
+                    training_total_data += img.shape[0]
+                    training_correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
 
             # Validation loop.
             running_validation_loss = 0.0
@@ -321,45 +319,43 @@ class Trainer:
             with torch.no_grad():
                 self.vit_model.eval()
                 self.mlp_head.eval()
-                tqdm_validation_loader = tqdm(self.validation_loader)
-                tqdm_validation_loader.set_description(
-                    f'VALID EPOCH: {epoch} '
-                )
-                for idx, (img, labels) in enumerate(tqdm_validation_loader):
-                    img = img.to(self.device)
-                    labels = labels.to(self.device)
+                with tqdm(self.validation_loader) as tqdm_validation_loader:
+                    tqdm_validation_loader.set_description(f'VALID EPOCH: {epoch} ')
+                    for idx, (img, labels) in enumerate(tqdm_validation_loader):
+                        img = img.to(self.device)
+                        labels = labels.to(self.device)
 
-                    vit_output = self.vit_model(img)
-                    predicted_labels = self.mlp_head(vit_output)
+                        vit_output = self.vit_model(img)
+                        predicted_labels = self.mlp_head(vit_output)
 
-                    validation_loss = self.loss_fn(predicted_labels, labels)
+                        validation_loss = self.loss_fn(predicted_labels, labels)
 
-                    running_validation_loss += validation_loss.item()
-                    validation_total_data += img.shape[0]
-                    validation_correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
+                        running_validation_loss += validation_loss.item()
+                        validation_total_data += img.shape[0]
+                        validation_correct_preds += (torch.argmax(predicted_labels, dim=1) == labels).sum().item()
 
-                    if idx % self.save_every == self.save_every - 1:
-                        fig, ax = plt.subplots(nrows=self.nrows, ncols=self.ncols)
-                        plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
-                        k = 0
-                        for i in range(self.nrows):
-                            for j in range(self.ncols):
-                                ax[i, j].imshow(
-                                    (img[k].permute(1, 2, 0) * 127.5 + 128).clamp(0, 255).to(
-                                        torch.uint8).detach().cpu().numpy()
-                                )
-                                ax[i, j].text(
-                                    0.0, -2.0,
-                                    f'GT:{labels[k]}, Prd:{torch.argmax(predicted_labels[k])}',
-                                    fontsize=12
-                                )
-                                k += 1
+                        if idx % self.save_every == self.save_every - 1:
+                            fig, ax = plt.subplots(nrows=self.nrows, ncols=self.ncols)
+                            plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[])
+                            k = 0
+                            for i in range(self.nrows):
+                                for j in range(self.ncols):
+                                    ax[i, j].imshow(
+                                        (img[k].permute(1, 2, 0) * 127.5 + 128).clamp(0, 255).to(
+                                            torch.uint8).detach().cpu().numpy()
+                                    )
+                                    ax[i, j].text(
+                                        0.0, -2.0,
+                                        f'GT:{labels[k]}, Prd:{torch.argmax(predicted_labels[k])}',
+                                        fontsize=12
+                                    )
+                                    k += 1
 
-                        self.writer_predictions.add_figure('Validation Real vs Pred', figure=fig, global_step=self.step)
-                        self.step += 1
+                            self.writer_predictions.add_figure('Validation Real vs Pred', figure=fig, global_step=self.step)
+                            self.step += 1
 
-                self.vit_model.train()
-                self.mlp_head.train()
+                    self.vit_model.train()
+                    self.mlp_head.train()
 
             train_loss_value = running_train_loss / len(self.train_loader)
             training_accuracy = (100.0 * training_correct_preds / training_total_data)
