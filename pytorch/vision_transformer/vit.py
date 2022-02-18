@@ -351,32 +351,34 @@ class Trainer:
                                     )
                                     k += 1
 
-                            self.writer_predictions.add_figure('Validation Real vs Pred', figure=fig, global_step=self.step)
+                            self.writer_predictions.add_figure(
+                                'Validation Real vs Pred', figure=fig, global_step=self.step
+                            )
                             self.step += 1
 
                     self.vit_model.train()
                     self.mlp_head.train()
 
-            train_loss_value = running_train_loss / len(self.train_loader)
-            training_accuracy = (100.0 * training_correct_preds / training_total_data)
-            validation_loss_value = running_validation_loss / len(self.validation_loader)
-            validation_accuracy = (100.0 * validation_correct_preds / validation_total_data)
+                train_loss_value = running_train_loss / len(self.train_loader)
+                training_accuracy = (100.0 * training_correct_preds / training_total_data)
+                validation_loss_value = running_validation_loss / len(self.validation_loader)
+                validation_accuracy = (100.0 * validation_correct_preds / validation_total_data)
 
-            print(
-                f"TRAINING LOSS: {train_loss_value:.3f}, "
-                f"TRAINING ACCURACY: {training_accuracy:.3f}, "
-                f"VALIDATION LOSS: {validation_loss_value:.3f}, "
-                f"VALIDATION ACCURACY: {validation_accuracy:.3f}"
-            )
+                print(
+                    f"TRAINING LOSS: {train_loss_value:.3f}, "
+                    f"TRAINING ACCURACY: {training_accuracy:.3f}, "
+                    f"VALIDATION LOSS: {validation_loss_value:.3f}, "
+                    f"VALIDATION ACCURACY: {validation_accuracy:.3f}"
+                )
 
-            if validation_accuracy > best_accuracy:
-                best_accuracy = validation_accuracy
-                torch.save({
-                    'epoch': epoch,
-                    'vit_model_state_dict': self.vit_model.state_dict(),
-                    'mlp_head_state_dict': self.mlp_head.state_dict(),
-                    'optimizer_state_dict': self.optim.state_dict(),
-                }, f'checkpoints/checkpoint_{epoch}.pt')
+                if validation_accuracy > best_accuracy:
+                    best_accuracy = validation_accuracy
+                    torch.save({
+                        'epoch': epoch,
+                        'vit_model_state_dict': self.vit_model.state_dict(),
+                        'mlp_head_state_dict': self.mlp_head.state_dict(),
+                        'optimizer_state_dict': self.optim.state_dict(),
+                    }, f'checkpoints/checkpoint_{epoch}.pt')
 
 
 if __name__ == '__main__':
