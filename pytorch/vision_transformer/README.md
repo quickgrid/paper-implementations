@@ -4,6 +4,8 @@ Trained on small subset of `MNIST` greyscale images. Also trained on `6000` imag
 
 By providing `checkpoint_path` it will resume training from last point. Seems to produce acceptable result within a few epochs without pretraining.
 
+Each folder must have same amount of images as `accuracy` is used to measure the correct match amount.
+
 ### Data Format
 
 In sample gif below, `true` labels for the classes are `[car, cat, person] = [0, 1, 2]`. Directory structure for running code should be,
@@ -47,6 +49,7 @@ In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\
 - Add accuracy logic print, loss data in tensorboard.
 - Format output better.
 - Check if implementation is correct.
+- Try to add confusion matrix, stratified k fold for imbalanced data.
 
 
 ## References
