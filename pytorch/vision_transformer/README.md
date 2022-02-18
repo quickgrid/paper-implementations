@@ -52,3 +52,7 @@ In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\
 - https://keras.io/examples/vision/image_classification_with_vision_transformer/
 - https://github.com/lucidrains/vit-pytorch/blob/main/vit_pytorch/vit.py
 - https://github.com/jeonsworld/ViT-pytorch/blob/main/models/modeling.py
+
+## Acknowledgement
+
+Thanks to Lucas N. for finding implementation mistakes in a previous commit, alternative approaches as well as quite a few pytorch best practices suggestion.
