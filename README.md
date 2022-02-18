@@ -6,6 +6,9 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 
 **WARNING: Codes may be incomplete, will likely have bugs, mistakes or plain wrong due to lack of proper understanding. Use at own risk.**
 
+:rocket: Represents I am fairly confident implementation works on custom dataset and at least part of it is close enough to proposed paper topic. Also tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
+
+
 <!--
 ## Table of Contents
 
@@ -36,7 +39,7 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
-| **Vision Transformer** | [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (ViT)](pytorch/vision_transformer) |
+| **Vision Transformer** | :rocket: [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (ViT)](pytorch/vision_transformer) |
 |  |  |
 | **Image Segmentation** | [U-Net: Convolutional Networks for Biomedical Image Segmentation (UNet)](pytorch/u-net) |
 |  |  |
