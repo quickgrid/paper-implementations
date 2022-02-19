@@ -171,6 +171,7 @@ class Trainer:
     def __init__(
             self,
             dataset_path: str,
+            dataset_type: str = None,
             validation_dataset_path: str = None,
             teacher_checkpoint_path: str = None,
             student_checkpoint_path: str = None,
@@ -260,8 +261,11 @@ class Trainer:
         self.teacher_model.to(self.device)
         self.student_model.to(self.device)
 
-        self.optim = torch.optim.Adam(
+        self.teacher_optimizer = torch.optim.Adam(
             params=self.teacher_model.parameters(), lr=learning_rate, weight_decay=0.001
+        )
+        self.student_optimizer = torch.optim.Adam(
+            params=self.student_model.parameters(), lr=learning_rate, weight_decay=0.001
         )
 
         self.label_crossentropy_loss = nn.CrossEntropyLoss().to(self.device)
@@ -284,6 +288,7 @@ class Trainer:
         if training_mode == 'teacher':
             self.start_epoch = self.teacher_start_epoch
             self.selected_model = self.teacher_model
+            self.optim = self.teacher_optimizer
         if training_mode == 'distill' or training_mode == 'student':
             if student_checkpoint_path is not None:
                 self.load_student_checkpoint(checkpoint_path=student_checkpoint_path)
@@ -291,17 +296,18 @@ class Trainer:
             else:
                 self.start_epoch = 0
             self.selected_model = self.student_model
+            self.optim = self.student_optimizer
 
     def load_teacher_checkpoint(self, checkpoint_path: str) -> None:
         checkpoint = torch.load(checkpoint_path)
         self.teacher_model.load_state_dict(checkpoint['model_state_dict'])
-        self.optim.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.teacher_model.load_state_dict(checkpoint['optimizer_state_dict'])
         self.teacher_start_epoch = checkpoint['epoch']
 
     def load_student_checkpoint(self, checkpoint_path: str) -> None:
         checkpoint = torch.load(checkpoint_path)
         self.student_model.load_state_dict(checkpoint['model_state_dict'])
-        self.optim.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.student_model.load_state_dict(checkpoint['optimizer_state_dict'])
         self.student_start_epoch = checkpoint['epoch']
 
     def train(self) -> None:
@@ -514,12 +520,12 @@ class Trainer:
 if __name__ == '__main__':
     trainer = Trainer(
         dataset_path=r'C:\staging\classification_data',
-        # teacher_checkpoint_path='checkpoints/teacher_checkpoint_5.pt',
+        # teacher_checkpoint_path='checkpoints/teacher_checkpoint_8.pt',
         # student_checkpoint_path='checkpoints/distill_checkpoint_7.pt',
         image_size=96,
         batch_size=32,
         # training_mode='distill',
-        # training_mode='student',
-        training_mode='teacher',
+        training_mode='student',
+        # training_mode='teacher',
     )
     trainer.train()
