@@ -39,7 +39,7 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
-| **Knowledge Distillation** | [Distilling the Knowledge in a Neural Network (Knowledge Distillation)](pytorch/knowledge-distillation) |
+| **Knowledge Distillation** | :rocket: [Distilling the Knowledge in a Neural Network (Knowledge Distillation)](pytorch/knowledge-distillation) |
 |  |  |
 | **Vision Transformer** | :rocket: [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (ViT)](pytorch/vision_transformer) |
 |  |  |
