@@ -2,8 +2,9 @@
 
 Only tested on a dataset of `2000 cats` and `2000 dogs`. Dataset must have equal images for accuracy calculation. Distillation performance cannot be compared correctly between runs when separate validation set is not supplied.
 
-Student learns only from teacher when `label_loss_importance = 0.0` otherwise it also learns that amount from labels and rest from soft targets. Student does not seem get very good result on data tested. Maybe student too weak.
+There likely will be data leakage from training set to validation when separate validation dataset is not given. A teacher might learn on subset of data that during students training may fall in validaiton set.
 
+Student learns only from teacher when `label_loss_importance = 0.0` otherwise it also learns that amount from labels and rest from soft targets. Student does not seem get very good result on data tested. Maybe student too weak.
 
 ### Monitoring Progress
 
