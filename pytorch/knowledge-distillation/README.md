@@ -1,6 +1,6 @@
 ## Notes
 
-Only tested on a dataset of `2000 cats` and `2000 dogs`.
+Only tested on a dataset of `2000 cats` and `2000 dogs`. Dataset must have equal images for accuracy calculation. Distillation performance cannot be compared correctly between runs when separate validation set is not supplied.
 
 ## Results
 
