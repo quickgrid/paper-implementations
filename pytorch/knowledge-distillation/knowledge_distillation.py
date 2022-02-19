@@ -16,7 +16,6 @@ References
 import os
 import pathlib
 from typing import Tuple
-import copy
 
 import torch
 import torch.nn as nn
@@ -172,7 +171,6 @@ class Trainer:
     def __init__(
             self,
             dataset_path: str,
-            dataset_type: str = None,
             validation_dataset_path: str = None,
             teacher_checkpoint_path: str = None,
             student_checkpoint_path: str = None,
@@ -201,72 +199,46 @@ class Trainer:
         class_names = os.listdir(dataset_path)
         num_classes = len(class_names)
 
-        if dataset_type is None:
-            def _dataset_split():
-                _vit_dataset = DistillationDataset(
-                    root_dir=dataset_path,
+        def _dataset_split():
+            _vit_dataset = DistillationDataset(
+                root_dir=dataset_path,
+                image_channels=image_channels,
+                image_size=image_size,
+            )
+            if validation_dataset_path is None:
+                _train_size = int(train_split_percentage * len(_vit_dataset))
+                _test_size = len(_vit_dataset) - _train_size
+                _train_dataset, _validation_dataset = torch.utils.data.random_split(
+                    _vit_dataset,
+                    [_train_size, _test_size]
+                )
+                return _train_dataset, _validation_dataset
+            else:
+                _validation_dataset = DistillationDataset(
+                    root_dir=validation_dataset_path,
                     image_channels=image_channels,
                     image_size=image_size,
                 )
-                if validation_dataset_path is None:
-                    _train_size = int(train_split_percentage * len(_vit_dataset))
-                    _test_size = len(_vit_dataset) - _train_size
-                    _train_dataset, _validation_dataset = torch.utils.data.random_split(
-                        _vit_dataset,
-                        [_train_size, _test_size]
-                    )
-                    return _train_dataset, _validation_dataset
-                else:
-                    _validation_dataset = DistillationDataset(
-                        root_dir=validation_dataset_path,
-                        image_channels=image_channels,
-                        image_size=image_size,
-                    )
-                    return _vit_dataset, _validation_dataset
+                return _vit_dataset, _validation_dataset
 
-            train_dataset, validation_dataset = _dataset_split()
+        train_dataset, validation_dataset = _dataset_split()
 
-            self.train_loader = DataLoader(
-                dataset=train_dataset,
-                batch_size=batch_size,
-                shuffle=True,
-                num_workers=num_workers,
-                pin_memory=True,
-                drop_last=True,
-            )
-            self.validation_loader = DataLoader(
-                dataset=validation_dataset,
-                batch_size=batch_size,
-                shuffle=False,
-                num_workers=num_workers,
-                pin_memory=True,
-                drop_last=True,
-            )
-
-        else:
-            image_size = 32
-            transform = transforms.Compose([
-                transforms.Resize((image_size, image_size)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.5 for _ in range(image_channels)],
-                    std=[0.5 for _ in range(image_channels)],
-                )
-            ])
-            train_data = datasets.CIFAR10(
-                root=r'pytorch/AutoEncoder/data',
-                train=True, transform=transform, download=True
-            )
-            test_data = datasets.CIFAR10(
-                root=r'pytorch/AutoEncoder/data',
-                train=False, transform=transform, download=True
-            )
-            self.train_loader = torch.utils.data.DataLoader(
-                train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers
-            )
-            self.validation_loader = torch.utils.data.DataLoader(
-                test_data, batch_size=batch_size, shuffle=False, num_workers=num_workers
-            )
+        self.train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=True,
+            drop_last=True,
+        )
+        self.validation_loader = DataLoader(
+            dataset=validation_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=True,
+            drop_last=True,
+        )
 
         self.teacher_model = TeacherModel(
             num_classes=num_classes,
@@ -276,7 +248,6 @@ class Trainer:
             img_size=image_size,
             num_classes=num_classes,
         )
-        # self.student_nondistilled_model = copy.deepcopy(self.student_model)
 
         if debug:
             m = torch.rand(1, image_channels, image_size, image_size)
