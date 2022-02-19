@@ -20,7 +20,7 @@ In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\
 
 ## Results
 
-
+TODO
 
 ## Todo
 
