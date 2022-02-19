@@ -45,7 +45,7 @@ In browser head to, http://localhost:8088/ to see tensorboard. Replace, `C:\GAN\
 
 ## Todo
 
-- Look into class, mean pooling to match paper implementation.
+- Look into class token classification, mean pooling to match paper implementation.
 - Add accuracy logic print, loss data in tensorboard.
 - Format output better.
 - Check if implementation is correct.
