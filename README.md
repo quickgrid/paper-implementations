@@ -6,7 +6,7 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 
 **WARNING: Codes may be incomplete, will likely have bugs, mistakes or plain wrong due to lack of proper understanding. Use at own risk.**
 
-:rocket: Represents I am fairly confident implementation works on custom dataset and at least part of it is close enough to proposed paper topic. Also tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
+:rocket: Represents I am fairly confident implementation works on custom dataset and at least part of it is close enough to proposed paper topic. Also mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
 
 
 <!--
