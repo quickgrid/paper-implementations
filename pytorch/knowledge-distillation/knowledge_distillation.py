@@ -301,13 +301,13 @@ class Trainer:
     def load_teacher_checkpoint(self, checkpoint_path: str) -> None:
         checkpoint = torch.load(checkpoint_path)
         self.teacher_model.load_state_dict(checkpoint['model_state_dict'])
-        self.teacher_model.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.teacher_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.teacher_start_epoch = checkpoint['epoch']
 
     def load_student_checkpoint(self, checkpoint_path: str) -> None:
         checkpoint = torch.load(checkpoint_path)
         self.student_model.load_state_dict(checkpoint['model_state_dict'])
-        self.student_model.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.student_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.student_start_epoch = checkpoint['epoch']
 
     def train(self) -> None:
@@ -524,8 +524,8 @@ if __name__ == '__main__':
         # student_checkpoint_path='checkpoints/distill_checkpoint_7.pt',
         image_size=96,
         batch_size=32,
-        # training_mode='distill',
-        training_mode='student',
-        # training_mode='teacher',
+        training_mode='distill',
+        # training_mode='student',
+        training_mode='teacher',
     )
     trainer.train()
