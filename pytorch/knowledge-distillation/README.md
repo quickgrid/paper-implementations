@@ -8,6 +8,8 @@ Student learns only from teacher when `label_loss_importance = 0.0` otherwise it
 
 In [this paper](https://openaccess.thecvf.com/content_ICCV_2019/papers/Cho_On_the_Efficacy_of_Knowledge_Distillation_ICCV_2019_paper.pdf) they detail popular choice for label cross entropy loss `alpha` or `label_loss_importance = 0.9` and temperature `[3, 5]`. Even when distilling more importance is on cross entropy then distillation KL Divergence loss.
 
+Based on reading few papers my understanding is it does not yet quite live up to its name.
+
 ### Monitoring Progress
 
 Assuming tensorboard is installed with tensorflow or separately. Monitoring progress in tensorboard in windows,
