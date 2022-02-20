@@ -1,5 +1,7 @@
 """Knowledge Distillation implementation in pytorch.
 
+Augmentation applied only when separate validation supplied.
+
 TODO
     - Remove duplicated code and simplify training for both teacher, student.
     - Do not load other models if not needed to reduce memory.
@@ -23,7 +25,6 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from torchvision import datasets
 from torchvision.transforms import transforms
 from torch.nn import functional
 from tqdm import tqdm
@@ -37,15 +38,22 @@ class DistillationDataset(Dataset):
             root_dir: str,
             image_size: int,
             image_channels: int,
+            apply_augmentations: bool = False,
     ) -> None:
         super(DistillationDataset, self).__init__()
         class_list = os.listdir(root_dir)
 
+        augmentations = list()
+        if apply_augmentations:
+            augmentations = [
+                transforms.RandomRotation(25),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomEqualize(),
+            ]
+
         self.transform = transforms.Compose([
             transforms.Resize((image_size, image_size)),
-            transforms.RandomRotation(25),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomEqualize(),
+            *augmentations,
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.5 for _ in range(image_channels)],
@@ -81,10 +89,10 @@ class DistillationDataset(Dataset):
 class LayerDebugger(nn.Module):
     """Place in between layers of nn.Sequential to get their shape.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super(LayerDebugger, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         print(x.shape)
         return x
 
@@ -171,7 +179,7 @@ class Trainer:
     def __init__(
             self,
             dataset_path: str,
-            dataset_type: str = None,
+
             validation_dataset_path: str = None,
             teacher_checkpoint_path: str = None,
             student_checkpoint_path: str = None,
@@ -201,26 +209,32 @@ class Trainer:
         num_classes = len(class_names)
 
         def _dataset_split():
-            _vit_dataset = DistillationDataset(
+            _classification_dataset = DistillationDataset(
                 root_dir=dataset_path,
                 image_channels=image_channels,
                 image_size=image_size,
             )
             if validation_dataset_path is None:
-                _train_size = int(train_split_percentage * len(_vit_dataset))
-                _test_size = len(_vit_dataset) - _train_size
+                _train_size = int(train_split_percentage * len(_classification_dataset))
+                _test_size = len(_classification_dataset) - _train_size
                 _train_dataset, _validation_dataset = torch.utils.data.random_split(
-                    _vit_dataset,
+                    _classification_dataset,
                     [_train_size, _test_size]
                 )
                 return _train_dataset, _validation_dataset
             else:
+                _classification_dataset = DistillationDataset(
+                    root_dir=dataset_path,
+                    image_channels=image_channels,
+                    image_size=image_size,
+                    apply_augmentations=True,
+                )
                 _validation_dataset = DistillationDataset(
                     root_dir=validation_dataset_path,
                     image_channels=image_channels,
                     image_size=image_size,
                 )
-                return _vit_dataset, _validation_dataset
+                return _classification_dataset, _validation_dataset
 
         train_dataset, validation_dataset = _dataset_split()
 
@@ -524,7 +538,7 @@ if __name__ == '__main__':
         # student_checkpoint_path='checkpoints/distill_checkpoint_7.pt',
         image_size=96,
         batch_size=32,
-        training_mode='distill',
+        # training_mode='distill',
         # training_mode='student',
         training_mode='teacher',
     )
