@@ -179,7 +179,6 @@ class Trainer:
     def __init__(
             self,
             dataset_path: str,
-
             validation_dataset_path: str = None,
             teacher_checkpoint_path: str = None,
             student_checkpoint_path: str = None,
