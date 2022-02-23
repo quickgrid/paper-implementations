@@ -7,10 +7,10 @@ Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/).
 
 ## Todo
 
-- Fix KL loss becomes nan.
+- ~~Fix KL loss becomes nan.~~
 - Fix training not converging.
-- Fix after some iterations combined generator, vgg, feature loss becomes nan.
-- Discriminator backward fails due to nan.
+- ~~Fix after some iterations combined generator, vgg, feature loss becomes nan.~~
+- ~~Discriminator backward fails due to nan.~~
 - Check if architecture properly matches code.
 - Pass device type through function.
 
