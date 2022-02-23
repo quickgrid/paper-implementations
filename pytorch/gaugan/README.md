@@ -10,6 +10,7 @@ Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/).
 - Fix KL loss becomes nan.
 - Fix training not converging.
 - Fix after some iterations combined generator, vgg, feature loss becomes nan.
+- Discriminator backward fails due to nan.
 - Check if architecture properly matches code.
 
 ## References
