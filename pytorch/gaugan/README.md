@@ -7,7 +7,10 @@ Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/).
 
 ## Todo
 
-- Todo
+- Fix KL loss becomes nan.
+- Fix training not converging.
+- Fix after some iterations combined generator, vgg, feature loss becomes nan.
+- Check if architecture properly matches code.
 
 ## References
 
