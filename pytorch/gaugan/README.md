@@ -13,6 +13,7 @@ Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/).
 - ~~Discriminator backward fails due to nan.~~
 - Check if architecture properly matches code.
 - Pass device type through function.
+- Modify to try to generate and match mask also as loss.
 
 ## References
 
