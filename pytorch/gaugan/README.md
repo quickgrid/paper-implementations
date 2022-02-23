@@ -12,6 +12,7 @@ Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/).
 - Fix after some iterations combined generator, vgg, feature loss becomes nan.
 - Discriminator backward fails due to nan.
 - Check if architecture properly matches code.
+- Pass device type through function.
 
 ## References
 
