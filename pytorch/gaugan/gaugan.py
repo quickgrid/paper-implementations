@@ -1,9 +1,7 @@
 """Pytorch GauGAN implementation.
 
 Todo
-    - Fix KL loss becomes nan.
     - Fix training not converging.
-    - Fix after some iterations combined generator, vgg, feature loss becomes nan.
     - Check if architecture properly matches code.
     - Modify to try to generate and match mask also as loss.
     - Try discriminator with either segmentation image or label.
