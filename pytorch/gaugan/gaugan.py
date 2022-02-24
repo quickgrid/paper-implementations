@@ -456,7 +456,7 @@ class GauganDataset(Dataset):
         return image, segmentation_label
 
 
-def feature_matching_loss(self, real_preds, fake_preds):
+def feature_matching_loss(real_preds, fake_preds):
     _feature_matching_loss = 0.0
     for real_features, fake_features in zip(real_preds, fake_preds):
         _feature_matching_loss += functional.l1_loss(real_features, fake_features)
