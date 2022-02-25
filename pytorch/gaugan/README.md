@@ -6,7 +6,7 @@ Textures seem to be missing on 10 epochs tested.
 
 ## Results
 
-<img src="results/gaugan_missing_textures.gif" width=80% height=80%>
+<img src="results/gaugan_some_texture.gif" width=80% height=80%>
 
 ## Todo
 
