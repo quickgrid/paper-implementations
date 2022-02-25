@@ -13,6 +13,7 @@ Textures seem to be missing on 10 epochs tested. Reducing vgg loss coefficient s
 ## Todo
 
 - Improve generation result quality.
+- Add mask drawing based image generation.
 - Use multiscale discriminator outputs in loss calculation.
 - ~~Fix KL loss becomes nan.~~
 - ~~Fix training not converging.~~
