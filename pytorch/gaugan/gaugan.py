@@ -17,6 +17,7 @@ References
 
 import os
 import pathlib
+from datetime import datetime
 from typing import Tuple
 
 import torch
@@ -52,12 +53,23 @@ class ImageEncoder(nn.Module):
             apply_norm: bool = True,
             enable_dropout: bool = False,
             dropout_rate: float = 0.5,
+            apply_spectral_norm: bool = True,
     ) -> None:
         super(ImageEncoder, self).__init__()
 
         dropout_layer = list()
         if enable_dropout:
             dropout_layer = [nn.Dropout(p=dropout_rate)]
+
+        def _get_conv_layer(_in_channels: int, _out_channels: int, apply_bias: bool = False) -> list:
+            conv_layer = nn.Conv2d(
+                    in_channels=_in_channels, out_channels=_out_channels,
+                    kernel_size=(3, 3), padding=(1, 1), stride=(2, 2), bias=apply_bias,
+                )
+            if apply_spectral_norm:
+                conv_layer = spectral_norm(conv_layer)
+                return [conv_layer]
+            return [conv_layer]
 
         def _get_block(
                 _in_channels: int,
@@ -68,10 +80,7 @@ class ImageEncoder(nn.Module):
                 norm_layer = [nn.InstanceNorm2d(num_features=_out_channels, affine=False)]
 
             return [
-                spectral_norm(nn.Conv2d(
-                    in_channels=_in_channels, out_channels=_out_channels,
-                    kernel_size=(3, 3), padding=(1, 1), stride=(2, 2), bias=False,
-                )),
+                *_get_conv_layer(_in_channels=_in_channels, _out_channels=_out_channels),
                 *norm_layer,
                 nn.LeakyReLU(negative_slope=0.2),
                 *dropout_layer,
@@ -115,12 +124,35 @@ class Discriminator(nn.Module):
             apply_norm: bool = True,
             enable_dropout: bool = False,
             dropout_rate: float = 0.5,
+            apply_spectral_norm: bool = True,
     ) -> None:
         super(Discriminator, self).__init__()
 
         dropout_layer = list()
         if enable_dropout:
             dropout_layer = [nn.Dropout(p=dropout_rate)]
+
+        def _get_conv_layer(
+                _in_channels: int,
+                _out_channels: int,
+                _stride: int,
+                _padding: int,
+                _dilation: int,
+                apply_bias: bool = False
+        ) -> list:
+            conv_layer = nn.Conv2d(
+                in_channels=_in_channels, out_channels=_out_channels,
+                kernel_size=(4, 4),
+                padding=(_padding, _padding),
+                stride=(_stride, _stride),
+                dilation=(_dilation, _dilation),
+                device=device,
+                bias=apply_bias,
+            )
+            if apply_spectral_norm:
+                conv_layer = spectral_norm(conv_layer)
+                return [conv_layer]
+            return [conv_layer]
 
         def _get_block(
                 _in_channels: int, _out_channels: int, _stride: int, _padding: int, _dilation: int,
@@ -131,15 +163,10 @@ class Discriminator(nn.Module):
                 norm_layer = [nn.InstanceNorm2d(num_features=_out_channels, affine=False, device=device)]
 
             return nn.Sequential(
-                spectral_norm(nn.Conv2d(
-                    in_channels=_in_channels, out_channels=_out_channels,
-                    kernel_size=(4, 4),
-                    padding=(_padding, _padding),
-                    stride=(_stride, _stride),
-                    dilation=(_dilation, _dilation),
-                    device=device,
-                    bias=False,
-                )),
+                *_get_conv_layer(
+                    _in_channels=_in_channels, _out_channels=_out_channels,
+                    _stride=_stride, _padding=_padding, _dilation=_dilation,
+                ),
                 *norm_layer,
                 nn.LeakyReLU(negative_slope=0.2),
                 *dropout_layer,
@@ -177,7 +204,6 @@ class Discriminator(nn.Module):
             x = layer(x)
             multiscale_features.append(x)
         x = self.disc_out_layer(x)
-        multiscale_features.append(x)
         return x, multiscale_features
 
 
@@ -557,8 +583,9 @@ class Trainer:
 
         self.fixed_noise = torch.randn((batch_size, latent_dim), device=self.device)
 
-        self.writer_real = SummaryWriter(f"logs/real")
-        self.writer_fake = SummaryWriter(f"logs/fake")
+        current_datetime = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.writer_real = SummaryWriter(f'logs/real/{current_datetime}/')
+        self.writer_fake = SummaryWriter(f'logs/fake/{current_datetime}/')
         self.step = 0
 
         self.start_epoch = 0
@@ -623,7 +650,8 @@ class Trainer:
                         fake_pred_multiscale_features,
                     )
 
-                    generator_loss = loss_gen + 0.05 * loss_kldiv + 10 * loss_vgg + 10 * loss_features
+                    generator_loss = loss_gen + 0.1 * loss_kldiv + 0.1 * loss_vgg + 10 * loss_features
+                    # generator_loss = loss_gen + 0.1 * loss_kldiv + 10 * loss_vgg + 10 * loss_features
 
                     self.gen_optimizer.zero_grad(set_to_none=True)
                     generator_loss.backward()
@@ -666,6 +694,6 @@ if __name__ == '__main__':
     trainer = Trainer(
         root_dir=r'C:\staging\gaugan_data\base',
         num_classes=12,
-        # checkpoint_path='checkpoints/checkpoint_6.pt'
+        # checkpoint_path='checkpoints/checkpoint_19.pt'
     )
     trainer.train()
