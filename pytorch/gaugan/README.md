@@ -2,9 +2,11 @@
 
 Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/). Training seem to converge even on dataset of 1000 pictures. `SPADE` block previous input tensor needs to be normalized then modulated with `beta`, `gamma` embedding output of segmentation mask.
 
-Textures seem to be missing on 10 epochs tested.
+Textures seem to be missing on 10 epochs tested. Reducing vgg loss coefficient seems to improve color and texture.
 
 ## Results
+
+<img src="results/gaugan_missing_textures.gif" width=80% height=80%>
 
 <img src="results/gaugan_some_texture.gif" width=80% height=80%>
 
