@@ -8,6 +8,7 @@ Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/). Training 
 ## Todo
 
 - Improve generation result quality.
+- Use multiscale discriminator outputs in loss calculation.
 - ~~Fix KL loss becomes nan.~~
 - ~~Fix training not converging.~~
 - ~~Fix after some iterations combined generator, vgg, feature loss becomes nan.~~
