@@ -36,7 +36,7 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 |  | [Wasserstein GAN (WGAN)](pytorch/wgan) |
 |  | [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
 |  | [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
-|  | [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
+|  | :rocket: [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
