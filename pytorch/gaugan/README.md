@@ -1,17 +1,17 @@
 ## Notes
 
-Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/). Training converges even on dataset of 1000 pictures. 
+Tested on [Facade dataset](https://cmp.felk.cvut.cz/~tylecr1/facade/). Training seem to converge even on dataset of 1000 pictures. `SPADE` block previous input tensor needs to be normalized then modulated with `beta`, `gamma` embedding output of segmentation mask.
 
 ## Results
 
 
 ## Todo
 
+- Improve generation result quality.
 - ~~Fix KL loss becomes nan.~~
 - ~~Fix training not converging.~~
 - ~~Fix after some iterations combined generator, vgg, feature loss becomes nan.~~
 - ~~Discriminator backward fails due to nan.~~
-- Check if architecture properly matches code.
 - Pass device type through function.
 - Modify to try to generate and match mask also as loss.
 
