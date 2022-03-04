@@ -251,9 +251,7 @@ class SPADE(nn.Module):
 
     def forward(self, packed_tensor: torch.Tensor) -> torch.Tensor:
         prev_input, onehot_mask = packed_tensor
-        var, mean = torch.var_mean(prev_input, dim=(0, 2, 3), keepdim=True)
-        std = torch.sqrt(var + 1e-5)
-        normalized = (prev_input - mean) / std
+        normalized = self.normalizer(prev_input)
         mask = functional.interpolate(onehot_mask.float(), size=prev_input.shape[2:], mode='nearest')
         x = self.embedding_conv(mask)
         gamma = self.gamma_conv(x)
@@ -668,8 +666,8 @@ class Trainer:
                         fake_pred_multiscale_features,
                     )
 
-                    generator_loss = loss_gen + 0.1 * loss_kldiv + 0.1 * loss_vgg + 10 * loss_features
-                    # generator_loss = loss_gen + 0.1 * loss_kldiv + 10 * loss_vgg + 10 * loss_features
+                    # generator_loss = loss_gen + 0.1 * loss_kldiv + 0.1 * loss_vgg + 10 * loss_features
+                    generator_loss = loss_gen + 0.1 * loss_kldiv + 10 * loss_vgg + 10 * loss_features
 
                     self.gen_optimizer.zero_grad(set_to_none=True)
                     generator_loss.backward()
