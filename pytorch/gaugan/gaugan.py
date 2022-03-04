@@ -50,10 +50,9 @@ class ImageEncoder(nn.Module):
             self,
             img_size: int,
             latent_dim: int,
-            apply_norm: bool = True,
             enable_dropout: bool = False,
             dropout_rate: float = 0.5,
-            apply_spectral_norm: bool = True,
+            apply_spectral_norm: bool = False,
     ) -> None:
         super(ImageEncoder, self).__init__()
 
@@ -74,6 +73,7 @@ class ImageEncoder(nn.Module):
         def _get_block(
                 _in_channels: int,
                 _out_channels: int,
+                apply_norm: bool = True,
         ) -> list:
             norm_layer = list()
             if apply_norm:
@@ -91,8 +91,11 @@ class ImageEncoder(nn.Module):
         linear_features = 8192
 
         conv_layers = list()
-        for in_channels, out_channels in zip(channel_in, channel_out):
-            conv_layers.extend(_get_block(_in_channels=in_channels, _out_channels=out_channels))
+        for idx, (in_channels, out_channels) in enumerate(zip(channel_in, channel_out)):
+            if idx != 0:
+                conv_layers.extend(_get_block(_in_channels=in_channels, _out_channels=out_channels))
+            else:
+                conv_layers.extend(_get_block(_in_channels=in_channels, _out_channels=out_channels, apply_norm=False))
 
         self.encoder_layers = nn.Sequential(
             *conv_layers,
@@ -121,10 +124,9 @@ class Discriminator(nn.Module):
             self,
             num_classes: int,
             device: torch.device,
-            apply_norm: bool = True,
             enable_dropout: bool = False,
             dropout_rate: float = 0.5,
-            apply_spectral_norm: bool = True,
+            apply_spectral_norm: bool = False,
     ) -> None:
         super(Discriminator, self).__init__()
 
@@ -155,7 +157,12 @@ class Discriminator(nn.Module):
             return [conv_layer]
 
         def _get_block(
-                _in_channels: int, _out_channels: int, _stride: int, _padding: int, _dilation: int,
+                _in_channels: int,
+                _out_channels: int,
+                _stride: int,
+                _padding: int,
+                _dilation: int,
+                apply_norm: bool = True,
         ) -> nn.Sequential:
             norm_layer = list()
             if apply_norm:
@@ -180,18 +187,30 @@ class Discriminator(nn.Module):
         dilation = [2, 2, 2, 2]
 
         self.disc_multiscale_features = list()
-        for in_channels, out_channels, stride, padding, dilation in zip(
+        for idx, (in_channels, out_channels, stride, padding, dilation) in enumerate(zip(
                 channel_in, channel_out, stride, padding, dilation
-        ):
-            self.disc_multiscale_features.append(
-                _get_block(
-                    _in_channels=in_channels,
-                    _out_channels=out_channels,
-                    _stride=stride,
-                    _padding=padding,
-                    _dilation=dilation,
+        )):
+            if idx != 0:
+                self.disc_multiscale_features.append(
+                    _get_block(
+                        _in_channels=in_channels,
+                        _out_channels=out_channels,
+                        _stride=stride,
+                        _padding=padding,
+                        _dilation=dilation,
+                    )
                 )
-            )
+            else:
+                self.disc_multiscale_features.append(
+                    _get_block(
+                        _in_channels=in_channels,
+                        _out_channels=out_channels,
+                        _stride=stride,
+                        _padding=padding,
+                        _dilation=dilation,
+                        apply_norm=False,
+                    )
+                )
 
         self.disc_out_layer = nn.Conv2d(
                 in_channels=512, out_channels=1, kernel_size=(4, 4), padding=(3, 3), stride=(2, 2), dilation=(2, 2)
@@ -232,13 +251,13 @@ class SPADE(nn.Module):
 
     def forward(self, packed_tensor: torch.Tensor) -> torch.Tensor:
         prev_input, onehot_mask = packed_tensor
+        var, mean = torch.var_mean(prev_input, dim=(0, 2, 3), keepdim=True)
+        std = torch.sqrt(var + 1e-5)
+        normalized = (prev_input - mean) / std
         mask = functional.interpolate(onehot_mask.float(), size=prev_input.shape[2:], mode='nearest')
         x = self.embedding_conv(mask)
         gamma = self.gamma_conv(x)
         beta = self.beta_conv(x)
-        var, mean = torch.var_mean(prev_input, dim=(0, 2, 3), keepdim=True)
-        std = torch.sqrt(var + 1e-5)
-        normalized = (prev_input - mean) / std
         output = gamma * normalized + beta
         return output
 
@@ -249,7 +268,7 @@ class SPADEResBlock(nn.Module):
             in_filters: int,
             out_filters: int,
             num_classes: int,
-            apply_spectral_norm: bool = True,
+            apply_spectral_norm: bool = False,
     ) -> None:
         super(SPADEResBlock, self).__init__()
         self.learned_skip = (in_filters != out_filters)
@@ -283,7 +302,7 @@ class SPADEResBlock(nn.Module):
         self.learned_skip_path = nn.Sequential(
             SPADE(out_channels=in_filters, num_classes=num_classes),
             nn.LeakyReLU(negative_slope=0.2),
-            *_get_conv_layer(in_channels=in_filters, out_channels=out_filters, apply_bias=False),
+            *_get_conv_layer(in_channels=in_filters, out_channels=out_filters, apply_bias=True),
         )
 
     def forward(self, packed_tensor: torch.Tensor) -> torch.Tensor:
@@ -311,9 +330,8 @@ class GaussianSampler(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         mean, variance = x
-        std = torch.exp(0.5 * variance)
-        epsilon = torch.randn_like(std)
-        noise_input = std * epsilon + mean
+        epsilon = torch.normal(mean=0.0, std=1.0, size=(self.batch_size, self.latent_dim), device=self.device)
+        noise_input = mean + torch.exp(0.5 * variance) * epsilon
         return noise_input
 
 
@@ -336,7 +354,7 @@ class Generator(nn.Module):
 
         self.initial_shape = 1024
 
-        filter_list = [self.initial_shape, 1024, 1024, 512, 256, 128, 64]
+        filter_list = [self.initial_shape, 1024, 512, 256, 128, 128, 64]
         self.filter_list_len = len(filter_list)
 
         self.generator_middle_layers = list()
