@@ -1,12 +1,12 @@
 # Paper-Implementations
 
-Implementation attempts of various AI papers in simple form etc. These implementations are not meant to be exact and are categorized into a general section.
+Implementation attempts of various AI papers in simple form etc. These implementations are not meant to be exact and are categorized into a general section. Codes should work.
 
 This repository is primarily for my learning purposes. If there are any bugs, mistakes please don't hesitate to point out.
 
-**WARNING: Codes may be incomplete, will likely have bugs, mistakes or plain wrong due to lack of proper understanding. Use at own risk.**
+**WARNING: Codes may be incomplete, will likely have bugs, mistakes, may also be wrong.**
 
-:rocket: Represents I am fairly confident implementation works on custom dataset and at least part of it is close enough to proposed paper topic. Also mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
+:rocket: Represents I am fairly confident implementation works **(some things may not be same as defined in paper)** on custom dataset and at least part of it is close enough to proposed paper topic. Also mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
 
 
 <!--
@@ -31,12 +31,12 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 
 | Topic | Code |
 | --- | --- |
-| **Generative Adverserial Networks (GAN)** | [Generative Adversarial Networks (GAN)](pytorch/gan) |
-|  | [Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks (DCGAN)](pytorch/dcgan) |
-|  | [Wasserstein GAN (WGAN)](pytorch/wgan) |
-|  | [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
-|  | [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
-|  | :rocket: [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
+| **Generative Adverserial Networks (GAN)** | :rocket: [Generative Adversarial Networks (GAN)](pytorch/gan) |
+|  | :rocket: [Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks (DCGAN)](pytorch/dcgan) |
+|  | :rocket: [Wasserstein GAN (WGAN)](pytorch/wgan) |
+|  | :rocket: [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
+|  | :rocket: [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
+|  | [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
