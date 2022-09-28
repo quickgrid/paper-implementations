@@ -1,6 +1,6 @@
 ## Denoising Diffusion
 
-Annotated implementation of DDPM, improved DDPM with EMA, learning rate scheduling, cosine noise scheduling, positional encoding etc.
+Annotated implementation of DDPM, improved DDPM with EMA, learning rate scheduling, cosine noise scheduling, positional encoding, mixed precision training, gradient accumulation for large minibatch training etc.
 
 <br>
 
