@@ -50,7 +50,7 @@ Various tools useful for custom training. These are not paper implementation.
 
 | Topic | Code |
 | --- | --- |
-| **Image resize, verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](pytorch/tools) |
+| **Image resize, verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](tools) |
 |  |  |
 
 
