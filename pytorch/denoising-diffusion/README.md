@@ -1,8 +1,14 @@
 # Denoising Diffusion
 
-Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`. 
+Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`.  It may require atleast half or an hour to generate something recognizable. Only `64 x 64` resolution is tested. 
 
-It may require atleast half or an hour to generate something recognizable. Only `64 x 64` resolution is tested. 
+For gradient accumulation `batch_size * accumulation_iters` is the actual minibatch size. If code `batch_size = 2` and `accumulation_iters = 16` then minibatch size for gradient calculation is 32.
+
+### Process
+
+Noise is applied to images on each timestep `t` based on noise schedule. This is forward process `q` with larger `t` the more noise. A random timestep is chosen per minibatch based on which noise is generated that is used to corrupt input images. The image is passed to network that predicts the noise for given timestep. L1 or L2 loss calculated between predicted noise and image corruption noise. Algorithm 1 of DDPM paper is used train the network.
+
+Sampling from trained network is reverse process `p` that generates denoised image. A random noise is passed through network for `T` steps that denoises the image. Algorithm 2 of DDPM paper is used for sampling.
 
 ### Features
 
@@ -18,7 +24,7 @@ It may require atleast half or an hour to generate something recognizable. Only 
 - Sinusoidal positional embedding with dropout.
 - Precalculated values for faster sampling.
 - Mixed precision training.
-- Gradient accumulation for large minibatch training.
+- Gradient accumulation for large minibatch training to fit in low memory GPU.
 - UNet with Attention layers.
 
 <br>
