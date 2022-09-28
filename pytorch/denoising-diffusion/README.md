@@ -2,6 +2,8 @@
 
 Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timestep equal to `T`. 
 
+It may require atleast half or an hour to generate something recognizable.
+
 ### Features
 
 - Annotated code with example and paper reference.
@@ -17,6 +19,7 @@ Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only
 - Precalculated values for faster sampling.
 - Mixed precision training.
 - Gradient accumulation for large minibatch training.
+- UNet with Attention layers.
 
 <br>
 
