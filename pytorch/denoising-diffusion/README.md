@@ -2,7 +2,7 @@
 
 Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`. 
 
-It may require atleast half or an hour to generate something recognizable.
+It may require atleast half or an hour to generate something recognizable. Only `64 x 64` resolution is tested. 
 
 ### Features
 
@@ -38,7 +38,7 @@ It may require atleast half or an hour to generate something recognizable.
 - Class conditional generation.
 - Classifier Free Guidance (CFG).
 - Save EMA step number with checkpoint.
-- Add super resolution with unet.
+- Add super resolution with unet like imagen for 4X upsampling, `64x64 => 256x256 => 1024x1024`.
 
 <br>
 
