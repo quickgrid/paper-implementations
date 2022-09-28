@@ -56,12 +56,13 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 
 
 ## References
-- DDPM paper, https://arxiv.org/pdf/2006.11239.pdf.
-- DDIM paper, https://arxiv.org/pdf/2010.02502.pdf.
-- Annotated Diffusion, https://huggingface.co/blog/annotated-diffusion.
-- Keras DDIM, https://keras.io/examples/generative/ddim/.
 - Implementation, https://www.youtube.com/watch?v=TBCRlnwJtZU.
 - Implementation, https://github.com/dome272/Diffusion-Models-pytorch.
+- DDPM paper, https://arxiv.org/pdf/2006.11239.pdf.
+- DDIM paper, https://arxiv.org/pdf/2010.02502.pdf.
+- Improved DDPM, https://arxiv.org/pdf/2102.09672.pdf.
+- Annotated Diffusion, https://huggingface.co/blog/annotated-diffusion.
+- Keras DDIM, https://keras.io/examples/generative/ddim/.
 - Postional embedding, http://nlp.seas.harvard.edu/annotated-transformer/.
 - Attention paper, https://arxiv.org/pdf/1706.03762.pdf.
 - Transformers, https://pytorch.org/tutorials/beginner/transformer_tutorial.html.
