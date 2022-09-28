@@ -4,6 +4,8 @@ Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only
 
 For gradient accumulation `batch_size * accumulation_iters` is the actual minibatch size. If code `batch_size = 2` and `accumulation_iters = 16` then minibatch size for gradient calculation is 32.
 
+For fast training it is best to first resize to expected size and remove corrupted, low res images with tools in this repo.
+
 ### Process
 
 Noise is applied to images on each timestep `t` based on noise schedule. This is forward process `q` with larger `t` the more noise. A random timestep is chosen per minibatch based on which noise is generated that is used to corrupt input images. The image is passed to network that predicts the noise for given timestep. L1 or L2 loss calculated between predicted noise and image corruption noise. Algorithm 1 of DDPM paper is used train the network.
