@@ -1,31 +1,13 @@
 # Paper-Implementations
 
-Implementation attempts of various AI papers in simple form etc. These implementations are not meant to be exact and are categorized into a general section. Codes should work.
+Implementation attempts of various AI papers in simple form etc for my learning purposes. These implementations are not meant to be exact and are categorized into a general section. 
 
-This repository is primarily for my learning purposes. If there are any bugs, mistakes please don't hesitate to point out.
+These codes should work. Reports for any bugs, mistakes welcome.
 
-**WARNING: Codes may be incomplete, will likely have bugs, mistakes, may also be wrong.**
+**WARNING: Codes may be incomplete, will likely have bugs, mistakes.**
 
 :rocket: Represents I am fairly confident implementation works **(some things may not be same as defined in paper)** on custom dataset and at least part of it is close enough to proposed paper topic. Also mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
 
-
-<!--
-## Table of Contents
-
-- [Table of Contents](#table-of-contents)
-  * `# Pytorch`
-    + Generative Adverserial Networks (GAN)
-      - [GAN](pytorch/gan)
-      - [DCGAN](pytorch/dcgan) 
-      - [WGAN](pytorch/wgan) 
-      - [WGAN-GP](pytorch/wgan-gp)
-      - [ProGAN](pytorch/progan)
-    + Activation Functions
-      - [SIREN](pytorch/siren)
-  * `# Keras`
-    + Object Detection
-      - [RetinaNet](keras/retinanet)
--->
 
 ## Pytorch
 
@@ -37,6 +19,8 @@ This repository is primarily for my learning purposes. If there are any bugs, mi
 |  | :rocket: [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
 |  | :rocket: [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
 |  | [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
+|  |  |
+| **Denoising Diffusion** | [Denoising Diffusion Probabilistic Models](pytorch/denoising-diffusion) <br> [Denoising Diffusion Implicit Models](pytorch/denoising-diffusion) <br> [Improved Denoising Diffusion Probabilistic Models](pytorch/denoising-diffusion) |
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
