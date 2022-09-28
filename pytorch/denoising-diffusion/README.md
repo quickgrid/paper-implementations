@@ -1,4 +1,4 @@
-## Denoising Diffusion
+# Denoising Diffusion
 
 Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model).
 
