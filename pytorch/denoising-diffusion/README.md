@@ -1,6 +1,6 @@
 # Denoising Diffusion
 
-Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model).
+Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timestep equal to `T`. 
 
 ### Features
 
@@ -32,6 +32,7 @@ Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model).
 - Class conditional generation.
 - Classifier Free Guidance (CFG).
 - Save EMA step number with checkpoint.
+- Add super resolution with unet.
 
 <br>
 
