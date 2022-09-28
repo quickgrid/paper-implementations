@@ -1,6 +1,6 @@
 # Denoising Diffusion
 
-Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timestep equal to `T`. 
+Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`. 
 
 It may require atleast half or an hour to generate something recognizable.
 
