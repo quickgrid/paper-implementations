@@ -8,7 +8,6 @@ These codes should work. Reports for any bugs, mistakes welcome.
 
 :rocket: Represents I am fairly confident implementation works **(some things may not be same as defined in paper)** on custom dataset and at least part of it is close enough to proposed paper topic. Also mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
 
-
 ## Pytorch
 
 | Topic | Code |
@@ -43,6 +42,17 @@ These codes should work. Reports for any bugs, mistakes welcome.
 | **Object Detection** | [Focal Loss for Dense Object Detection (RetinaNet)](keras/retinanet) |
 |  |  |
 -->
+
+
+## Tools
+
+Various tools useful for custom training. These are not paper implementation.
+
+| Topic | Code |
+| --- | --- |
+| **Image resize, verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](pytorch/tools) |
+|  |  |
+
 
 
 ## Papers of Interest
