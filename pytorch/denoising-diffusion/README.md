@@ -4,6 +4,8 @@ Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only
 
 For gradient accumulation `batch_size * accumulation_iters` is the actual minibatch size. If code `batch_size = 2` and `accumulation_iters = 16` then minibatch size for gradient calculation is 32.
 
+Parent folder path should be provided in `dataset_path`. Inside it must be one or more folder with images. These folders are used as class information.
+
 For fast training it is best to first resize to expected size and remove corrupted, low res images with tools in this repo.
 
 ### Process
