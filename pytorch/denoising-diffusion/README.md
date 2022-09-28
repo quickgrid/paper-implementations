@@ -25,6 +25,9 @@ Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only
 
 <br>
 
+## Pretrained Checkpoints
+
+<br>
 
 ## Todo
 
