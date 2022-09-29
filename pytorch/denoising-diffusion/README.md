@@ -1,6 +1,6 @@
 # Denoising Diffusion
 
-Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`.  It may require atleast half or an hour to generate something recognizable. Only `64 x 64` resolution is tested. 
+Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`.  It may require atleast an hour or two to generate something recognizable based on dataset. Only `64 x 64` resolution is tested. 
 
 For gradient accumulation `batch_size * accumulation_iters` is the actual minibatch size. If code `batch_size = 2` and `accumulation_iters = 16` then minibatch size for gradient calculation is 32.
 
@@ -39,6 +39,11 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 <br>
 
 ## Pretrained Checkpoints
+
+| Dataset | Download Link |
+| ----------- | ----------- |
+| [Stanford Cars]() |  |
+| [CelebA]() |  |
 
 <br>
 
