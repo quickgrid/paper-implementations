@@ -9,19 +9,27 @@ Parent folder path should be provided in `dataset_path`. Inside it must be one o
 For fast training it is best to first resize to expected size and remove corrupted, low res images with tools in this repo.
 
 
-### Process
+## Results
+
+**Stanford Cars Dataset**
+
+![ddpm_cars](images/ddpm_cars.gif "ddpm_cars")
+![ddpm_ema_cars](images/ddpm_ema_cars.gif "ddpm_ema_cars")
+
+**CelebA Dataset**
+
+![ddpm_celeba](images/ddpm_celeba.gif "ddpm_celeba")
+![ddpm_ema_celeba](images/ddpm_ema_celeba.gif "ddpm_ema_celeba")
+
+
+## Process
+
+![ddpm_diagram](images/ddpm_diagram.png "ddpm_diagram")
+
 
 Noise is applied to images on each timestep `t` based on noise schedule. This is forward process `q` with larger `t` the more noise. A random timestep is chosen per minibatch based on which noise is generated that is used to corrupt input images. The image is passed to network that predicts the noise for given timestep. L1 or L2 loss calculated between predicted noise and image corruption noise. Algorithm 1 of DDPM paper is used train the network.
 
 Sampling from trained network is reverse process `p` that generates denoised image. A random noise is passed through network for `T` steps that denoises the image. Algorithm 2 of DDPM paper is used for sampling.
-
-
-### Codes
-
-| Name | Description |
-| ----------- | ----------- |
-| `ddpm_basic.py` | Minimal implementation for reference and easy understanding. |
-| `ddpm.py` | Implementation for testing new features. |
 
 
 ### Features
@@ -41,9 +49,14 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 - Gradient accumulation for large minibatch training to fit in low memory GPU.
 - UNet with Attention layers.
 
-<br>
 
-## Results
+
+### Codes
+
+| Name | Description |
+| ----------- | ----------- |
+| `ddpm_basic.py` | Minimal implementation for reference and easy understanding. |
+| `ddpm.py` | Implementation for testing new features. |
 
 
 <br>
