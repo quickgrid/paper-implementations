@@ -1,5 +1,7 @@
 # Denoising Diffusion
 
+**Newest version available here, https://github.com/quickgrid/pytorch-diffusion.**
+
 Annotated implementation of DDPM (Denoising Diffusion Probabilistic Model). Only slow sampling is implemented so far with both train and test timesteps equal to `T`.  It may require atleast an hour or two to generate something recognizable based on dataset. Only `64 x 64` resolution is tested. 
 
 For gradient accumulation `batch_size * accumulation_iters` is the actual minibatch size. If code `batch_size = 2` and `accumulation_iters = 16` then minibatch size for gradient calculation is 32.
@@ -18,7 +20,7 @@ Results were upsampled from `64 x 64` trained model output to `128 x 128` by nea
 ![ddpm_cars](images/ddpm_cars.gif "ddpm_cars")
 ![ddpm_ema_cars](images/ddpm_ema_cars.gif "ddpm_ema_cars")
 
-**CelebA Dataset**
+**CelebA HQ Dataset**
 
 ![ddpm_celeba](images/ddpm_celeba.gif "ddpm_celeba")
 ![ddpm_ema_celeba](images/ddpm_ema_celeba.gif "ddpm_ema_celeba")
@@ -35,10 +37,15 @@ Results were upsampled from `64 x 64` trained model output to `128 x 128` by nea
 
 ### Pretrained Checkpoints
 
+Models are available in, https://huggingface.co/quickgrid/pytorch-diffusion.
+
 | Dataset | Download Link |
 | ----------- | ----------- |
-| [Stanford Cars]() |  |
-| [CelebA]() |  |
+| [Stanford Cars]() | https://huggingface.co/quickgrid/pytorch-diffusion/blob/main/cars_61_4000.pt |
+|  | https://huggingface.co/quickgrid/pytorch-diffusion/blob/main/cars_ema_61_4000.pt |
+|  |  |
+| [CelebA HQ]() | https://huggingface.co/quickgrid/pytorch-diffusion/blob/main/celeba_147_0.pt |
+|  | https://huggingface.co/quickgrid/pytorch-diffusion/blob/main/celeba_ema_147_0.pt |
 
 
 
