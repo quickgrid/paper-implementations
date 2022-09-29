@@ -9,7 +9,7 @@ Parent folder path should be provided in `dataset_path`. Inside it must be one o
 For fast training it is best to first resize to expected size and remove corrupted, low res images with tools in this repo.
 
 
-## Results
+### Results
 
 Results were upsampled from `64 x 64` trained model output to `128 x 128` by nearest interpolation.
 
@@ -22,6 +22,24 @@ Results were upsampled from `64 x 64` trained model output to `128 x 128` by nea
 
 ![ddpm_celeba](images/ddpm_celeba.gif "ddpm_celeba")
 ![ddpm_ema_celeba](images/ddpm_ema_celeba.gif "ddpm_ema_celeba")
+
+
+
+### Codes
+
+| Name | Description |
+| ----------- | ----------- |
+| `ddpm_basic.py` | Minimal implementation for reference and easy understanding. |
+| `ddpm.py` | Implementation for testing new features. |
+
+
+### Pretrained Checkpoints
+
+| Dataset | Download Link |
+| ----------- | ----------- |
+| [Stanford Cars]() |  |
+| [CelebA]() |  |
+
 
 
 ## Process
@@ -53,24 +71,6 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 
 
 
-### Codes
-
-| Name | Description |
-| ----------- | ----------- |
-| `ddpm_basic.py` | Minimal implementation for reference and easy understanding. |
-| `ddpm.py` | Implementation for testing new features. |
-
-
-<br>
-
-## Pretrained Checkpoints
-
-| Dataset | Download Link |
-| ----------- | ----------- |
-| [Stanford Cars]() |  |
-| [CelebA]() |  |
-
-<br>
 
 ## Todo
 
@@ -82,13 +82,10 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 - Train and test with SWA EMA model. 
 - Add loss to tensorboard.
 
-<br>
 
 ## Issues
 
 - Logging does not print in kaggle.
-
-<br>
 
 ## References
 - Implementation, https://www.youtube.com/watch?v=TBCRlnwJtZU.
