@@ -694,9 +694,6 @@ class Trainer:
 
                         accumulated_minibatch_loss += float(loss)
 
-                        # image_loss = F.smooth_l1_loss(x_t, real_images).requires_grad_(False)
-                        # image_loss /= self.accumulation_iters
-
                     self.grad_scaler.scale(loss).backward()
 
                     # if ((batch_idx + 1) % self.accumulation_iters == 0) or ((batch_idx + 1) == len(self.train_loader)):
