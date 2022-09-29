@@ -59,6 +59,11 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 
 <br>
 
+## Issues
+
+- Logging does not print in kaggle.
+
+<br>
 
 ## References
 - Implementation, https://www.youtube.com/watch?v=TBCRlnwJtZU.
