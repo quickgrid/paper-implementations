@@ -76,20 +76,6 @@ Sampling from trained network is reverse process `p` that generates denoised ima
 - Gradient accumulation for large minibatch training to fit in low memory GPU.
 - UNet with Attention layers.
 
-
-
-
-## Todo
-
-- Try to implement ddim.
-- Class conditional generation.
-- Classifier Free Guidance (CFG).
-- Save EMA step number with checkpoint.
-- Add super resolution with unet like imagen for 4X upsampling, `64x64 => 256x256 => 1024x1024`.
-- Train and test with SWA EMA model. 
-- Add loss to tensorboard.
-
-
 ## Issues
 
 - Logging does not print in kaggle.
