@@ -19,7 +19,8 @@ These codes should work. Reports for any bugs, mistakes welcome.
 |  | :rocket: [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
 |  | [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
 |  |  |
-| **Denoising Diffusion** | :rocket: [Denoising Diffusion Probabilistic Models](pytorch/denoising-diffusion) |
+| **Denoising Diffusion** | :rocket: [Denoising Diffusion Probabilistic Models](pytorch/ddpm) |
+|  | :rocket: [Denoising Diffusion Implicit Models](pytorch/ddim) |
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
