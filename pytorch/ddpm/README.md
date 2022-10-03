@@ -1,4 +1,4 @@
-# Denoising Diffusion
+# DDPM
 
 **Newest version available here, https://github.com/quickgrid/pytorch-diffusion.**
 
