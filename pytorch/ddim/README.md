@@ -11,10 +11,10 @@ Results were upsampled from `64 x 64` trained model output to `128 x 128` by nea
 
 CelebA HQ dataset with 40 reverse diffusion steps. No frames skipped during GIF generation.
 
-![celeba_hq](images/celeba_hq.gif "ddpm_celeba")
-![celeba_hq_ema_1](images/celeba_hq_ema_1.gif "celeba_hq_ema_1")
-![celeba_hq_ema_2](images/celeba_hq_ema_2.gif "celeba_hq_ema_2")
-![celeba_hqa_ema_3](images/celeba_hq_ema_3.gif "celeba_hq_ema_3")
+![ddim_celeba_hq](images/ddim_celeba_hq.gif "ddim_celeba")
+![ddim_celeba_hq_ema_1](images/ddim_celeba_hq_ema_1.gif "ddim_celeba_hq_ema_1")
+![ddim_celeba_hq_ema_2](images/ddim_celeba_hq_ema_2.gif "ddim_celeba_hq_ema_2")
+![ddim_celeba_hqa_ema_3](images/ddim_celeba_hq_ema_3.gif "ddim_celeba_hq_ema_3")
 
 Ground Truth Image vs. Random Noised Image vs. Denoised Image.
 
