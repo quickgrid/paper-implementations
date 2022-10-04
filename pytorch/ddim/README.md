@@ -7,7 +7,9 @@ Implementation of DDIM (Denoising Diffusion Implicit Model). Training noise step
 
 ### Results
 
-Results were upsampled from `64 x 64` trained model output to `128 x 128` by nearest interpolation.
+Results were upsampled from `64 x 64` trained model output to `128 x 128` by nearest interpolation. 
+
+CelebA HQ dataset with 40 reverse diffusion steps. No frames skipped during GIF generation.
 
 ![celeba_hq](images/celeba_hq.gif "ddpm_celeba")
 ![celeba_hq_ema_1](images/celeba_hq_ema_1.gif "celeba_hq_ema_1")
