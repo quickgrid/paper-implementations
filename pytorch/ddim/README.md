@@ -2,7 +2,7 @@
 
 **Newest version available here, https://github.com/quickgrid/pytorch-diffusion.**
 
-Annotated implementation of DDIM (Denoising Diffusion Implicit Model). 
+Implementation of DDIM (Denoising Diffusion Implicit Model). Training noise steps `T` can be large like `T = 1000`. Compared to DDPM, DDIM can generate good samples fast in less number of steps. For example, DDIM can generate quality sample in 20 to 50 steps where DDPM may need 500 or more steps based on training noise steps.
 
 
 ### Results
@@ -20,18 +20,12 @@ Results were upsampled from `64 x 64` trained model output to `128 x 128` by nea
 
 | Name | Description |
 | ----------- | ----------- |
-|  |  |
+| ddim.py | DDIM implementation with training, sampling image, gif. |
 
 
 ### Pretrained Checkpoints
 
 Models are available in, https://huggingface.co/quickgrid/pytorch-diffusion.
-
-| Dataset | Download Link |
-| ----------- | ----------- |
-|  |  |
-
-
 
 
 ## Process
@@ -43,4 +37,6 @@ TODO
 - Logging does not print in kaggle.
 
 ## References
-- TODO
+- https://github.com/quickgrid/paper-implementations/tree/main/pytorch/ddpm
+- https://keras.io/examples/generative/ddim/
+- https://openreview.net/pdf?id=St1giarCHLP
