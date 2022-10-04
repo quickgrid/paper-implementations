@@ -15,6 +15,8 @@ For fast training it is best to first resize to expected size and remove corrupt
 
 Results were upsampled from `64 x 64` trained model output to `128 x 128` by nearest interpolation.
 
+GIF generated with 500 reverse diffusion steps and by skipping every 20 frames in reverse process.
+
 **Stanford Cars Dataset**
 
 ![ddpm_cars](images/ddpm_cars.gif "ddpm_cars")
