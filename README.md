@@ -18,6 +18,7 @@ These codes should work. Reports for any bugs, mistakes welcome.
 |  | :rocket: [Improved Training of Wasserstein GANs (WGAN-GP)](pytorch/wgan-gp) |
 |  | :rocket: [Conditional Generative Adversarial Nets](pytorch/conditional-wgan) |
 |  | [Semantic Image Synthesis with Spatially-Adaptive Normalization (GauGAN/SPADE)](pytorch/gaugan) |
+|  | [Progressive Growing of Gans for Improved Quality, Stability, and Variation (ProGAN)](pytorch/progan) |
 |  |  |
 | **Denoising Diffusion** | :rocket: [Denoising Diffusion Probabilistic Models (DDPM)](pytorch/ddpm) |
 |  | :rocket: [Denoising Diffusion Implicit Models (DDIM)](pytorch/ddim) |
