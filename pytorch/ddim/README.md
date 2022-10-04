@@ -14,7 +14,9 @@ Results were upsampled from `64 x 64` trained model output to `128 x 128` by nea
 ![celeba_hq_ema_2](images/celeba_hq_ema_2.gif "celeba_hq_ema_2")
 ![celeba_hqa_ema_3](images/celeba_hq_ema_3.gif "celeba_hq_ema_3")
 
+Ground Truth Image vs. Random Noised Image vs. Denoised Image.
 
+![real_noised_denoised](images/real_noised_denoised.jpg "real_noised_denoised")
 
 ### Codes
 
