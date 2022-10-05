@@ -290,22 +290,14 @@ class EfficientUNet(nn.Module):
 
         skip_outputs = []
         for dblock in self.dblocks:
-            x = dblock(
-                x=x,
-                conditional_embedding=conditional_embedding,
-                contextual_text_embedding=contextual_text_embedding,
-            )
+            x = dblock(x, conditional_embedding, contextual_text_embedding)
             skip_outputs.append(x)
 
         skip_outputs.pop()
         x = self.ublocks[0](x)
 
         for ublock in self.ublocks[1:]:
-            x = ublock(
-                x,
-                x_skip=skip_outputs.pop(),
-                conditional_embedding=conditional_embedding,
-            )
+            x = ublock(x, skip_outputs.pop(), conditional_embedding)
 
         x = self.image_projection(x)
         return x
