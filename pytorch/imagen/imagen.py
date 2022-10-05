@@ -106,6 +106,7 @@ class EfficientUNetDBlock(nn.Module):
         super(EfficientUNetDBlock, self).__init__()
         self.use_attention = use_attention
 
+        # TODO: Paper mentions first conv of DBlock is optional. Use only if stride is provided and add test.
         self.initial_conv = nn.Conv2d(
             in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1), stride=stride
         )
