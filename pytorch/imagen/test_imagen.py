@@ -10,7 +10,8 @@ from imagen import (
     EfficientUNetResNetBlock,
     EfficientUNetDBlock,
     TransformerEncoderSA,
-    EfficientUNetUBlock
+    EfficientUNetUBlock,
+    EfficientUNet,
 )
 
 
@@ -155,11 +156,37 @@ class Tester:
         print(f'In shape: {x.shape}, Out shape: {out.shape}')
         assert out.shape == (n, out_channels, hw, hw), 'Error expected output shapes do not match.'
 
-        
+    def test_efficient_unet(
+            self,
+            n: int = 2,
+            hw: int = 64,
+            cond_embed_dim: int = 256,
+            print_arch: bool = None,
+    ) -> None:
+        print_arch = print_arch if print_arch else self.print_arch
+
+        image_channels = 3
+        x = torch.randn(size=(n, image_channels, hw, hw), device=self.device)
+        model = EfficientUNet(in_channels=image_channels, cond_embed_dim=256, num_resnet_blocks=2).to(self.device)
+        cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
+
+        if print_arch:
+            print(model)
+
+        out = model(
+            x=x,
+            conditional_embedding=cond_embedding,
+        )
+
+        print(f'In shape: {x.shape}, Out shape: {out.shape}')
+        assert out.shape == (n, image_channels, hw, hw), 'Error expected output shapes do not match.'
+
+
 if __name__ == '__main__':
     tester = Tester(print_arch=False)
-    tester.test_all()
+    # tester.test_all()
     # tester.test_efficient_unet_res_block()
     # tester.test_efficient_unet_dblock()
     # tester.test_transformer_encoder_sa()
     # tester.test_efficient_unet_ublock()
+    tester.test_efficient_unet(print_arch=True)
