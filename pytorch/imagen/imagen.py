@@ -83,8 +83,8 @@ class EfficientUNetDBlock(nn.Module):
     def __init__(
             self,
             out_channels: int,
-            num_resnet_blocks: int,
             cond_embed_dim: int,
+            num_resnet_blocks: int,
             contextual_text_embed_dim: int = None,
             stride: Tuple[int, int] = None,
             use_attention: bool = False,
@@ -179,8 +179,8 @@ class EfficientUNetUBlock(nn.Module):
     def __init__(
             self,
             out_channels: int,
-            num_resnet_blocks: int,
             cond_embed_dim: int,
+            num_resnet_blocks: int,
             stride: Tuple[int, int] = None,
             use_attention: bool = False,
     ):
@@ -233,4 +233,79 @@ class EfficientUNetUBlock(nn.Module):
         x = self.resnet_blocks(x)
         x = self.transformer_encoder_sa(x) if self.use_attention else x
         x = self.last_conv_upsampler(x) if self.use_conv else x
+        return x
+
+
+class EfficientUNet(nn.Module):
+    def __init__(
+            self,
+            in_channels: int,
+            num_resnet_blocks: int,
+            cond_embed_dim: int,
+            block_channels: list = None,
+    ):
+        """Efficient UNet architecture for 64 -> 256 upsampling as shown in Figure A.30.
+
+        TODO: Add support for different num_resnet_blocks for each dblocks, ublocks.
+        """
+        super(EfficientUNet, self).__init__()
+        if block_channels is None:
+            block_channels = [256, 128, 64, 32, 16]
+
+        self.initial_conv = nn.Conv2d(in_channels=in_channels, out_channels=128, kernel_size=(3, 3), padding=(1, 1))
+
+        self.dblocks = nn.ModuleList()
+        for num_channels in block_channels:
+            self.dblocks.append(
+                EfficientUNetDBlock(
+                    out_channels=num_channels, cond_embed_dim=cond_embed_dim, num_resnet_blocks=num_resnet_blocks
+                )
+            )
+
+        self.ublocks = nn.ModuleList()
+        for num_channels in reversed(block_channels):
+            self.ublocks.append(
+                EfficientUNetUBlock(
+                    out_channels=num_channels, cond_embed_dim=cond_embed_dim, num_resnet_blocks=num_resnet_blocks
+                )
+            )
+
+        self.image_projection = nn.Linear(in_features=block_channels[0], out_features=3)
+
+        # self.image_projection = nn.Conv2d(
+        #     in_channels=out_channels[0], out_channels=3, kernel_size=(3, 3), padding=(1, 1)
+        # )
+
+    def forward(
+            self,
+            x: torch.Tensor,
+            conditional_embedding: torch.Tensor,
+            contextual_text_embedding: torch.Tensor = None,
+    ) -> torch.Tensor:
+        """Efficient UNet forward for given number of unet blocks.
+
+        As shown in Figure A.30 the last unet dblock and first unet block in the middle do not have skip connection.
+        """
+        x = self.initial_conv(x)
+
+        skip_outputs = []
+        for dblock in self.dblocks:
+            x = dblock(
+                x=x,
+                conditional_embedding=conditional_embedding,
+                contextual_text_embedding=contextual_text_embedding,
+            )
+            skip_outputs.append(x)
+
+        skip_outputs.pop()
+        x = self.ublocks[0](x)
+
+        for ublock in self.ublocks[1:]:
+            x = ublock(
+                x,
+                x_skip=skip_outputs.pop(),
+                conditional_embedding=conditional_embedding,
+            )
+
+        x = self.image_projection(x)
         return x
