@@ -82,7 +82,6 @@ class TransformerEncoderSA(nn.Module):
 class EfficientUNetDBlock(nn.Module):
     def __init__(
             self,
-            in_channels: int,
             out_channels: int,
             num_resnet_blocks: int,
             cond_embed_dim: int,
@@ -100,7 +99,6 @@ class EfficientUNetDBlock(nn.Module):
         when stride is provided else keeps same shape in h, w.
 
         Args:
-            in_channels: Previous layer output channels.
             out_channels: Current block expected output channels.
             num_resnet_blocks: Number of sequential resnet blocks in dblock between CombineEmbs and SelfAttention.
             cond_embed_dim: Conditinal embeddings dimension like time, class, text embeddings.
@@ -111,9 +109,10 @@ class EfficientUNetDBlock(nn.Module):
         """
         super(EfficientUNetDBlock, self).__init__()
         self.use_attention = use_attention
+        self.use_conv = True if stride else False
 
         self.initial_conv = nn.Conv2d(
-            in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1), stride=stride
+            in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1), stride=stride
         )
 
         self.conditional_embedding_layer = nn.Sequential(
@@ -161,7 +160,7 @@ class EfficientUNetDBlock(nn.Module):
             contextual_text_embedding: Contextual text embedding from pretrained model like T5. Example shape,
                 (batch, 1, 1, 1024).
         """
-        x = self.initial_conv(x)
+        x = self.initial_conv(x) if self.use_conv else x
         cond_embed = self.conditional_embedding_layer(conditional_embedding)
         cond_embed = cond_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
         x = x + cond_embed
