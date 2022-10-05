@@ -86,27 +86,32 @@ class EfficientUNetDBlock(nn.Module):
             out_channels: int,
             num_resnet_blocks: int,
             cond_embed_dim: int,
-            context_embed_dim: int = None,
+            contextual_text_embed_dim: int = None,
             stride: Tuple[int, int] = None,
             use_attention: bool = False,
     ):
-        """Implementation of Efficient UNet DBlock as shown in Figure A.28.
+        """Implementation of Efficient UNet DBlock as shown in Figure A.28. If stide is provided downsamples
+        input tensor by the amount.
 
         Embedding layers are used to bring feature map shape to expected embedding dimension from different input
         dimensions.
+
+        In paper first conv in DBlock is optional with strided downsampling. Conv block is kept and only down samples
+        when stride is provided else keeps same shape in h, w.
 
         Args:
             in_channels: Previous layer output channels.
             out_channels: Current block expected output channels.
             num_resnet_blocks: Number of sequential resnet blocks in dblock between CombineEmbs and SelfAttention.
             cond_embed_dim: Conditinal embeddings dimension like time, class, text embeddings.
+            contextual_text_embed_dim: Embedded text dimension for example, T5 output with 1024 in channel dimension.
             stride: With (1, 1) output has same h, w as input with shape of (batch_size, out_channel, h, w).
                 With stride of (2, 2) downsamples tensor as (batch_size, out_channel, h / 2, w / 2).
+            use_attention: Attention is only used if True.
         """
         super(EfficientUNetDBlock, self).__init__()
         self.use_attention = use_attention
 
-        # TODO: Paper mentions first conv of DBlock is optional. Use only if stride is provided and add test.
         self.initial_conv = nn.Conv2d(
             in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1), stride=stride
         )
@@ -124,7 +129,7 @@ class EfficientUNetDBlock(nn.Module):
         if use_attention:
             self.transformer_encoder_sa = TransformerEncoderSA(num_channels=out_channels)
             self.contextual_text_embedding_layer = nn.Sequential(
-                nn.Linear(in_features=context_embed_dim, out_features=out_channels)
+                nn.Linear(in_features=contextual_text_embed_dim, out_features=out_channels)
             )
 
     def forward(
@@ -133,7 +138,7 @@ class EfficientUNetDBlock(nn.Module):
             conditional_embedding: torch.Tensor,
             contextual_text_embedding: torch.Tensor = None,
     ) -> torch.Tensor:
-        """DBlock, initial conv -> combine embs -> resnet blocks -> self attention.
+        """DBlock, initial conv (optional) -> combine embs -> resnet blocks -> self attention (optional).
 
         Expected conditional_embedding shape (batch, 1, 1, cond_embed_dim), which is passed through embedding layer.
         Embedding layer converts cond_embed_dim to out_channels to match initial conv output shape. The output shape
@@ -151,7 +156,7 @@ class EfficientUNetDBlock(nn.Module):
         same as they are projected to expected shape `output_channels` with embedding layers.
 
         Args:
-            x: Input tensor.
+            x: Previous DBlock output.
             conditional_embedding: Time, Text embedding. Example shape, (batch, 1, 1, 256).
             contextual_text_embedding: Contextual text embedding from pretrained model like T5. Example shape,
                 (batch, 1, 1, 1024).
@@ -168,4 +173,65 @@ class EfficientUNetDBlock(nn.Module):
             x = x + context_text_embed
             x = self.transformer_encoder_sa(x)
 
+        return x
+
+
+class EfficientUNetUBlock(nn.Module):
+    def __init__(
+            self,
+            out_channels: int,
+            num_resnet_blocks: int,
+            cond_embed_dim: int,
+            stride: Tuple[int, int] = None,
+            use_attention: bool = False,
+    ):
+        """Implementation of Efficient UNet UBlock as shown in Figure A.29.
+
+        Rather than not having conv block when stride is not provided it is kept. It upsamples if stride is provided
+        else keeps the same shape in spatial dimension.
+        """
+        super(EfficientUNetUBlock, self).__init__()
+        self.use_attention = use_attention
+        self.use_conv = True if stride else False
+
+        self.conditional_embedding_layer = nn.Sequential(
+            nn.Linear(in_features=cond_embed_dim, out_features=out_channels)
+        )
+
+        self.resnet_blocks = nn.Sequential()
+        for _ in range(num_resnet_blocks):
+            self.resnet_blocks.append(
+                EfficientUNetResNetBlock(in_channels=out_channels, out_channels=out_channels)
+            )
+
+        if use_attention:
+            self.transformer_encoder_sa = TransformerEncoderSA(num_channels=out_channels)
+
+        self.last_conv_upsampler = nn.Sequential(
+            nn.Conv2d(
+                in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1),
+            ),
+            nn.Upsample(scale_factor=stride, mode='bilinear', align_corners=True),
+        )
+
+    def forward(
+            self,
+            x: torch.Tensor,
+            x_skip: torch.Tensor,
+            conditional_embedding: torch.Tensor,
+    ) -> torch.Tensor:
+        """Ublock, combine embs -> resnet blocks -> self attention (optional) -> last conv (optional).
+
+        Args:
+            x: Previous UBlock output.
+            x_skip: Skip connection from DBlock.
+            conditional_embedding: Time embeddings.
+        """
+        x = x + x_skip
+        cond_embed = self.conditional_embedding_layer(conditional_embedding)
+        cond_embed = cond_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
+        x = x + cond_embed
+        x = self.resnet_blocks(x)
+        x = self.transformer_encoder_sa(x) if self.use_attention else x
+        x = self.last_conv_upsampler(x) if self.use_conv else x
         return x
