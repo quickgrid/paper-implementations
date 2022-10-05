@@ -35,19 +35,22 @@ class Tester:
         in_channels = 32
         out_channels = 128
         hw = 64
-        embed_dim = 256
+        cond_embed_dim = 256
+        contextual_text_embed_dim = 1024
 
         stride = (2, 2)
         assert stride[0] == stride[1], 'Equal stride must be used.'
         hw_new = 64 // stride[0]
 
         x = torch.randn(size=(n, in_channels, hw, hw), device=self.device)
-        t_embedding = torch.rand(size=(n, 1, 1, embed_dim), device=self.device)
+        cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
+        contextual_embedding = torch.rand(size=(n, 1, 1, contextual_text_embed_dim), device=self.device)
 
         efficient_unet_dblock = EfficientUNetDBlock(
             in_channels=in_channels,
             out_channels=out_channels,
-            embed_dim=embed_dim,
+            cond_embed_dim=cond_embed_dim,
+            context_embed_dim=contextual_text_embed_dim,
             num_resnet_blocks=2,
             stride=stride,
             use_attention=True,
@@ -55,7 +58,9 @@ class Tester:
 
         print(efficient_unet_dblock)
 
-        out = efficient_unet_dblock(x=x, t_embedding=t_embedding)
+        out = efficient_unet_dblock(
+            x=x, conditional_embedding=cond_embedding, contextual_text_embedding=contextual_embedding
+        )
         print(f'In shape: {x.shape}, Out shape: {out.shape}')
 
         assert out.shape == (n, out_channels, hw_new, hw_new), 'Error expected output shapes do not match.'
