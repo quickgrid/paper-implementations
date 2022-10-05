@@ -36,7 +36,7 @@ These codes should work. Reports for any bugs, mistakes welcome.
 | **Verification, Recognition, Clutering** <br> TAG: `Siamese Network (Siam)` | :rocket: [FaceNet: A Unified Embedding for Face Recognition and Clustering (Triplet Loss)](pytorch/siamese-triplet-loss) |
 |  | :rocket: [Siamese Neural Networks for One-shot Image Recognition](pytorch/siamese-contrastive-loss) <br>  &nbsp; &nbsp;  &nbsp; [Dimensionality Reduction by Learning an Invariant Mapping (Contrastive Loss)](pytorch/siamese-contrastive-loss) |
 |  |  |
-| **Implicit Representations** | [Implicit Neural Representations with Periodic Activation Functions (SIREN)](pytorch/siren) |
+| **Implicit Representations** | [Implicit Neural Representations with Periodic Activation Functions (SIREN)](pytorch/siren) <br> [COIN: COmpression with Implicit Neural representations](pytorch/siren) |
 
 <!--
 ## Keras
