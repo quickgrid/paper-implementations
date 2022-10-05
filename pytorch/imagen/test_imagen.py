@@ -1,3 +1,9 @@
+"""Tests for Imagen code.
+
+TODO:
+    - Test cases need to cover expected ouput with optional inputs and various combination.
+"""
+
 import torch
 from imagen import (
     EfficientUNetResNetBlock,
@@ -38,7 +44,6 @@ class Tester:
 
     def test_efficient_unet_dblock(self) -> None:
         n = 4
-        in_channels = 32
         out_channels = 128
         hw = 64
         cond_embed_dim = 256
@@ -48,12 +53,11 @@ class Tester:
         assert stride[0] == stride[1], 'Equal stride must be used.'
         hw_new = 64 // stride[0]
 
-        x = torch.randn(size=(n, in_channels, hw, hw), device=self.device)
+        x = torch.randn(size=(n, out_channels, hw, hw), device=self.device)
         cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
         contextual_embedding = torch.rand(size=(n, 1, 1, contextual_text_embed_dim), device=self.device)
 
         efficient_unet_dblock = EfficientUNetDBlock(
-            in_channels=in_channels,
             out_channels=out_channels,
             cond_embed_dim=cond_embed_dim,
             contextual_text_embed_dim=contextual_text_embed_dim,
