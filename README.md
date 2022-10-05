@@ -23,7 +23,7 @@ These codes should work. Reports for any bugs, mistakes welcome.
 | **Denoising Diffusion** | :rocket: [Denoising Diffusion Probabilistic Models (DDPM)](pytorch/ddpm) |
 |  | :rocket: [Denoising Diffusion Implicit Models (DDIM)](pytorch/ddim) |
 |  |  |
-| **Multimodal** | [Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding](pytorch/imagen) |
+| **Multimodal** | [Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding (Imagen)](pytorch/imagen) |
 |  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
