@@ -113,9 +113,6 @@ class EfficientUNetDBlock(nn.Module):
         self.conditional_embedding_layer = nn.Sequential(
             nn.Linear(in_features=cond_embed_dim, out_features=out_channels)
         )
-        self.contextual_text_embedding_layer = nn.Sequential(
-            nn.Linear(in_features=context_embed_dim, out_features=out_channels)
-        )
 
         self.resnet_blocks = nn.Sequential()
         for _ in range(num_resnet_blocks):
@@ -125,6 +122,9 @@ class EfficientUNetDBlock(nn.Module):
 
         if use_attention:
             self.transformer_encoder_sa = TransformerEncoderSA(num_channels=out_channels)
+            self.contextual_text_embedding_layer = nn.Sequential(
+                nn.Linear(in_features=context_embed_dim, out_features=out_channels)
+            )
 
     def forward(
             self,
@@ -152,7 +152,7 @@ class EfficientUNetDBlock(nn.Module):
         Args:
             x: Input tensor.
             conditional_embedding: Time, Text embedding. Example shape, (batch, 1, 1, 256).
-            contextual_text_embedding: Contextual text embedding from pretrained model. Example shape,
+            contextual_text_embedding: Contextual text embedding from pretrained model like T5. Example shape,
                 (batch, 1, 1, 1024).
         """
         x = self.initial_conv(x)
