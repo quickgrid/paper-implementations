@@ -59,6 +59,7 @@ class Tester:
     def test_efficient_unet_dblock(
             self,
             n: int = 4,
+            in_channels: int = 64,
             out_channels: int = 128,
             hw: int = 32,
             cond_embed_dim: int = 256,
@@ -73,11 +74,12 @@ class Tester:
             assert stride[0] == stride[1], 'Equal stride must be used.'
             hw_new = hw // stride[0]
 
-        x = torch.randn(size=(n, out_channels, hw, hw), device=self.device)
+        x = torch.randn(size=(n, in_channels, hw, hw), device=self.device)
         cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
         contextual_embedding = torch.rand(size=(n, 1, 1, contextual_text_embed_dim), device=self.device)
 
         model = EfficientUNetDBlock(
+            in_channels=in_channels,
             out_channels=out_channels,
             cond_embed_dim=cond_embed_dim,
             contextual_text_embed_dim=contextual_text_embed_dim,
@@ -99,7 +101,8 @@ class Tester:
     def test_efficient_unet_ublock(
             self,
             n: int = 4,
-            out_channels: int = 128,
+            in_channels: int = 128,
+            out_channels: int = 64,
             hw: int = 32,
             cond_embed_dim: int = 256,
             stride: Tuple[int, int] = None,
@@ -112,10 +115,11 @@ class Tester:
             assert stride[0] == stride[1], 'Equal stride must be used.'
             hw_new = hw * stride[0]
 
-        x = torch.randn(size=(n, out_channels, hw, hw), device=self.device)
+        x = torch.randn(size=(n, in_channels, hw, hw), device=self.device)
         cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
 
         model = EfficientUNetUBlock(
+            in_channels=in_channels,
             out_channels=out_channels,
             cond_embed_dim=cond_embed_dim,
             num_resnet_blocks=3,
@@ -127,7 +131,7 @@ class Tester:
             print(model)
 
         out = model(
-            x=x, x_skip=x, conditional_embedding=cond_embedding
+            x=x, conditional_embedding=cond_embedding
         )
 
         print(f'In shape: {x.shape}, Out shape: {out.shape}')
@@ -184,9 +188,10 @@ class Tester:
 
 if __name__ == '__main__':
     tester = Tester(print_arch=False)
-    # tester.test_all()
+    tester.test_all()
     # tester.test_efficient_unet_res_block()
-    # tester.test_efficient_unet_dblock()
+    # tester.test_efficient_unet_dblock(print_arch=True)
+    # tester.test_efficient_unet_dblock(n=2, stride=(2, 2), print_arch=True)
     # tester.test_transformer_encoder_sa()
     # tester.test_efficient_unet_ublock()
-    tester.test_efficient_unet(print_arch=True)
+    # tester.test_efficient_unet(print_arch=False)
