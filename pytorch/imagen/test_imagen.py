@@ -3,7 +3,7 @@
 TODO:
     - Test cases need to cover expected ouput with optional inputs and various combination.
 """
-from typing import Tuple
+from typing import Tuple, Union
 
 import torch
 from imagen import (
@@ -35,6 +35,8 @@ class Tester:
         self.test_efficient_unet(print_arch=False, hw=128)
         self.test_efficient_unet(print_arch=False, hw=64)
         self.test_efficient_unet(print_arch=False, hw=128)
+        self.test_efficient_unet(print_arch=False, hw=128, cond_embed_dim=512)
+        self.test_efficient_unet(print_arch=False, hw=256, cond_embed_dim=128)
 
     def test_efficient_unet_res_block(
             self,
@@ -51,6 +53,7 @@ class Tester:
         model = EfficientUNetResNetBlock(
             in_channels=in_channels, out_channels=out_channels
         ).to(self.device)
+        print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
         if print_arch:
             print(model)
@@ -91,6 +94,7 @@ class Tester:
             stride=stride,
             use_attention=True,
         ).to(self.device)
+        print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
         if print_arch:
             print(model)
@@ -130,6 +134,7 @@ class Tester:
             stride=stride,
             use_attention=True,
         ).to(self.device)
+        print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
         if print_arch:
             print(model)
@@ -152,9 +157,8 @@ class Tester:
 
         x = torch.randn(size=(n, out_channels, hw, hw), device=self.device)
 
-        model = TransformerEncoderSA(
-            num_channels=out_channels,
-        ).to(self.device)
+        model = TransformerEncoderSA(num_channels=out_channels,).to(self.device)
+        print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
         if print_arch:
             print(model)
@@ -168,15 +172,26 @@ class Tester:
             self,
             n: int = 2,
             hw: int = 64,
-            cond_embed_dim: int = 256,
+            cond_embed_dim: int = 512,
             print_arch: bool = None,
+            base_channel_dim: int = 32,
+            num_resnet_blocks: Union[Tuple[int, ...], int] = (1, 2, 3, 4),
+            channel_mults: Tuple[int, ...] = (1, 2, 3, 4),
     ) -> None:
         print_arch = print_arch if print_arch else self.print_arch
 
         image_channels = 3
         x = torch.randn(size=(n, image_channels, hw, hw), device=self.device)
-        model = EfficientUNet(in_channels=image_channels, cond_embed_dim=256, num_resnet_blocks=2).to(self.device)
         cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
+
+        model = EfficientUNet(
+            in_channels=image_channels,
+            cond_embed_dim=cond_embed_dim,
+            base_channel_dim=base_channel_dim,
+            channel_mults=channel_mults,
+            num_resnet_blocks=num_resnet_blocks,
+        ).to(self.device)
+        print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
         if print_arch:
             print(model)
@@ -193,12 +208,21 @@ class Tester:
 if __name__ == '__main__':
     tester = Tester(print_arch=False)
     # tester.test_all()
+
     # tester.test_efficient_unet_res_block()
     # tester.test_efficient_unet_dblock(print_arch=True)
     # tester.test_efficient_unet_dblock(n=2, stride=(2, 2), print_arch=True)
     # tester.test_transformer_encoder_sa()
     # tester.test_efficient_unet_ublock()
-    # tester.test_efficient_unet(print_arch=False, hw=256)
-    tester.test_efficient_unet(print_arch=False, hw=128)
-    # tester.test_efficient_unet(print_arch=False, hw=64)
     # tester.test_efficient_unet(print_arch=False, hw=512)
+    # tester.test_efficient_unet(print_arch=False, hw=256, cond_embed_dim=512)
+    # tester.test_efficient_unet(print_arch=False, hw=64)
+
+    tester.test_efficient_unet(
+        print_arch=False,
+        hw=128,
+        cond_embed_dim=512,
+        base_channel_dim=64,
+        channel_mults=(1, 1, 2, 3),
+        num_resnet_blocks=(2, 1, 1, 4)
+    )
