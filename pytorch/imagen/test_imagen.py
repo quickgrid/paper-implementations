@@ -175,6 +175,7 @@ class Tester:
             cond_embed_dim: int = 512,
             print_arch: bool = None,
             base_channel_dim: int = 32,
+            use_attention: bool = True,
             num_resnet_blocks: Union[Tuple[int, ...], int] = (1, 2, 3, 4),
             channel_mults: Tuple[int, ...] = (1, 2, 3, 4),
     ) -> None:
@@ -190,6 +191,7 @@ class Tester:
             base_channel_dim=base_channel_dim,
             channel_mults=channel_mults,
             num_resnet_blocks=num_resnet_blocks,
+            use_attention=use_attention,
         ).to(self.device)
         print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
@@ -219,10 +221,11 @@ if __name__ == '__main__':
     # tester.test_efficient_unet(print_arch=False, hw=64)
 
     tester.test_efficient_unet(
-        print_arch=False,
+        print_arch=True,
         hw=128,
         cond_embed_dim=512,
         base_channel_dim=64,
         channel_mults=(1, 1, 2, 3),
-        num_resnet_blocks=(2, 1, 1, 4)
+        num_resnet_blocks=(2, 1, 1, 4),
+        use_attention=True,
     )
