@@ -31,6 +31,10 @@ class Tester:
         self.test_efficient_unet_dblock(stride=(2, 2))
         self.test_efficient_unet_ublock(stride=None)
         self.test_efficient_unet_dblock(stride=None)
+        self.test_efficient_unet(print_arch=False, hw=256)
+        self.test_efficient_unet(print_arch=False, hw=128)
+        self.test_efficient_unet(print_arch=False, hw=64)
+        self.test_efficient_unet(print_arch=False, hw=128)
 
     def test_efficient_unet_res_block(
             self,
@@ -188,10 +192,13 @@ class Tester:
 
 if __name__ == '__main__':
     tester = Tester(print_arch=False)
-    tester.test_all()
+    # tester.test_all()
     # tester.test_efficient_unet_res_block()
     # tester.test_efficient_unet_dblock(print_arch=True)
     # tester.test_efficient_unet_dblock(n=2, stride=(2, 2), print_arch=True)
     # tester.test_transformer_encoder_sa()
     # tester.test_efficient_unet_ublock()
-    # tester.test_efficient_unet(print_arch=False)
+    # tester.test_efficient_unet(print_arch=False, hw=256)
+    tester.test_efficient_unet(print_arch=False, hw=128)
+    # tester.test_efficient_unet(print_arch=False, hw=64)
+    # tester.test_efficient_unet(print_arch=False, hw=512)
