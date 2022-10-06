@@ -7,6 +7,7 @@ References:
 """
 from typing import Tuple, List, Union
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -198,21 +199,25 @@ class EfficientUNetUBlock(nn.Module):
         self.use_conv = True if stride is not None else False
 
         self.conditional_embedding_layer = nn.Sequential(
-            nn.Linear(in_features=cond_embed_dim, out_features=in_channels)
+            nn.Linear(in_features=cond_embed_dim, out_features=out_channels)
+        )
+
+        self.input_embedding_layer = nn.Conv2d(
+            in_channels=in_channels, out_channels=out_channels, kernel_size=(1, 1)
         )
 
         self.resnet_blocks = nn.Sequential()
         for _ in range(num_resnet_blocks):
             self.resnet_blocks.append(
-                EfficientUNetResNetBlock(in_channels=in_channels, out_channels=in_channels)
+                EfficientUNetResNetBlock(in_channels=out_channels, out_channels=out_channels)
             )
 
         if use_attention:
-            self.transformer_encoder_sa = TransformerEncoderSA(num_channels=in_channels)
+            self.transformer_encoder_sa = TransformerEncoderSA(num_channels=out_channels)
 
         self.last_conv_upsampler = nn.Sequential(
             nn.Conv2d(
-                in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1),
+                in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3), padding=(1, 1),
             ),
             nn.Upsample(scale_factor=stride, mode='bilinear', align_corners=True),
         )
@@ -230,6 +235,8 @@ class EfficientUNetUBlock(nn.Module):
         """
         cond_embed = self.conditional_embedding_layer(conditional_embedding)
         cond_embed = cond_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
+        x = self.input_embedding_layer(x)
+
         x = x + cond_embed
         x = self.resnet_blocks(x)
         x = self.transformer_encoder_sa(x) if self.use_attention else x
@@ -262,59 +269,54 @@ class EfficientUNet(nn.Module):
 
         assert len(channel_mults) == len(num_resnet_blocks), 'channel_mults and num_resnet_blocks should be same shape.'
 
+        mutliplied_channels = np.array(channel_mults) * base_channel_dim
+        mutliplied_channels_len = len(mutliplied_channels)
+        mutliplied_channels_reversed = np.flip(mutliplied_channels)
+        num_resnet_blocks_reversed = np.flip(num_resnet_blocks)
+
         self.initial_conv = nn.Conv2d(
             in_channels=in_channels,
-            out_channels=base_channel_dim * channel_mults[0],
+            out_channels=mutliplied_channels[0],
             kernel_size=(3, 3),
             padding=(1, 1),
         )
 
         self.dblocks = nn.ModuleList()
-        tmp_in_channels = base_channel_dim * channel_mults[0]
-        for idx, num_channels in enumerate(channel_mults):
-            tmp_out_channels = num_channels * base_channel_dim
+        for idx, num_channels in enumerate(mutliplied_channels[:-1]):
             self.dblocks.append(
                 EfficientUNetDBlock(
-                    in_channels=tmp_in_channels,
-                    out_channels=tmp_out_channels,
+                    in_channels=mutliplied_channels[idx],
+                    out_channels=mutliplied_channels[idx + 1],
                     cond_embed_dim=cond_embed_dim,
                     num_resnet_blocks=num_resnet_blocks[idx],
                     stride=(2, 2),
                 )
             )
-            tmp_in_channels = tmp_out_channels
 
         self.ublocks = nn.ModuleList()
-        tmp_in_channels = base_channel_dim * channel_mults[-1]
         self.ublocks.append(
             EfficientUNetUBlock(
-                in_channels=tmp_in_channels,
-                out_channels=tmp_in_channels,
+                in_channels=mutliplied_channels_reversed[0],
+                out_channels=mutliplied_channels_reversed[1],
                 cond_embed_dim=cond_embed_dim,
-                num_resnet_blocks=num_resnet_blocks[0],
+                num_resnet_blocks=num_resnet_blocks_reversed[1],
                 stride=(2, 2),
             )
         )
-        for idx, num_channels in enumerate(reversed(channel_mults[:-1])):
-            tmp_out_channels = base_channel_dim * num_channels
-            tmp_in_channels += tmp_out_channels
+        for idx in range(1, mutliplied_channels_len - 1, 1):
             self.ublocks.append(
                 EfficientUNetUBlock(
-                    in_channels=tmp_in_channels,
-                    out_channels=tmp_out_channels,
+                    in_channels=mutliplied_channels_reversed[idx] * 2,
+                    out_channels=mutliplied_channels_reversed[idx + 1],
                     cond_embed_dim=cond_embed_dim,
-                    num_resnet_blocks=num_resnet_blocks[idx],
+                    num_resnet_blocks=num_resnet_blocks_reversed[idx],
                     stride=(2, 2),
                 )
             )
-            tmp_in_channels = tmp_out_channels
 
         self.image_projection = nn.Conv2d(
             in_channels=channel_mults[0] * base_channel_dim, out_channels=3, kernel_size=(3, 3), padding=(1, 1)
         )
-
-        del tmp_in_channels
-        del tmp_out_channels
 
     def forward(
             self,
@@ -328,16 +330,16 @@ class EfficientUNet(nn.Module):
         """
         x = self.initial_conv(x)
 
-        skip_outputs = []
+        x_skip_outputs = []
         for dblock in self.dblocks:
             x = dblock(x, conditional_embedding, contextual_text_embedding)
-            skip_outputs.append(x)
+            x_skip_outputs.append(x)
 
-        skip_outputs.pop()
+        x_skip_outputs.pop()
         x = self.ublocks[0](x=x, conditional_embedding=conditional_embedding)
 
         for ublock in self.ublocks[1:]:
-            x = torch.cat((x, skip_outputs.pop()), dim=1)
+            x = torch.cat((x, x_skip_outputs.pop()), dim=1)
             x = ublock(x=x, conditional_embedding=conditional_embedding)
 
         x = self.image_projection(x)
