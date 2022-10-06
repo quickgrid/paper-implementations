@@ -250,6 +250,7 @@ class EfficientUNet(nn.Module):
             in_channels: int = 3,
             cond_embed_dim: int = 512,
             base_channel_dim: int = 32,
+            use_attention: bool = True,
             num_resnet_blocks: Union[Tuple[int, ...], int] = None,
             channel_mults: Tuple[int, ...] = None,
     ):
@@ -313,6 +314,7 @@ class EfficientUNet(nn.Module):
                 cond_embed_dim=cond_embed_dim,
                 num_resnet_blocks=num_resnet_blocks_reversed[1],
                 stride=(2, 2),
+                use_attention=use_attention,
             )
         )
         for idx in range(1, mutliplied_channels_len - 1, 1):
@@ -323,6 +325,7 @@ class EfficientUNet(nn.Module):
                     cond_embed_dim=cond_embed_dim,
                     num_resnet_blocks=num_resnet_blocks_reversed[idx],
                     stride=(2, 2),
+                    use_attention=use_attention,
                 )
             )
 
