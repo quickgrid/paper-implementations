@@ -160,7 +160,7 @@ class EfficientUNetDBlock(nn.Module):
 
         Args:
             x: Previous DBlock output.
-            conditional_embedding: Time, Text embedding. Example shape, (batch, 1, 1, 256).
+            conditional_embedding: Time, class, pooled text embedding. Example shape, (batch, 1, 1, 256).
             contextual_text_embedding: Contextual text embedding from pretrained model like T5. Example shape,
                 (batch, 1, 1, 1024).
         """
@@ -231,7 +231,7 @@ class EfficientUNetUBlock(nn.Module):
 
         Args:
             x: Previous UBlock output.
-            conditional_embedding: Time embeddings.
+            conditional_embedding: Time, class, pooled Text embeddings.
         """
         cond_embed = self.conditional_embedding_layer(conditional_embedding)
         cond_embed = cond_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
