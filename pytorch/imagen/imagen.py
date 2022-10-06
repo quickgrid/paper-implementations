@@ -5,7 +5,7 @@ TODO: Add gradient checkpoint for chosen modules.
 References:
     - Imagen paper, https://arxiv.org/abs/2205.11487.
 """
-from typing import Tuple, List, Union
+from typing import Tuple, Union
 
 import numpy as np
 import torch
@@ -250,13 +250,25 @@ class EfficientUNet(nn.Module):
             in_channels: int = 3,
             cond_embed_dim: int = 512,
             base_channel_dim: int = 32,
-            num_resnet_blocks: Union[List[int], int] = None,
-            channel_mults: List[int] = None,
+            num_resnet_blocks: Union[Tuple[int, ...], int] = None,
+            channel_mults: Tuple[int, ...] = None,
     ):
         """UNet implementation for 64 x 64 image as defined in Section F.1 and efficient UNet architecture for
          64 -> 256 upsampling as shown in Figure A.30.
 
+        Ellipsis used for variable number of U and D blocks. The number of D and U blocks depend on the number
+        of `channel_mults`.
+
+        Parameter of the current UNet model does not depend on the image resolution.
+
         TODO: In cascade diffusion may need to concat low res image with noisy image which should result in 6 channels.
+
+        Args:
+            in_channels: Input image tensor channels.
+            cond_embed_dim: Timestep or text embedding output dimension.
+            base_channel_dim: Base value for multiplying with channel_mults for U or D blocks of UNet.
+            num_resnet_blocks: Number of resnet blocks in each of the U or D blocks of UNet.
+            channel_mults: Multiplier values for each of the U or D blocks in UNet.
         """
         super(EfficientUNet, self).__init__()
         if channel_mults is None:
