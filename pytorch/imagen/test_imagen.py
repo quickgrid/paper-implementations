@@ -176,14 +176,17 @@ class Tester:
             print_arch: bool = None,
             base_channel_dim: int = 32,
             use_attention: bool = True,
+            contextual_text_embed_dim: int = 1024,
             num_resnet_blocks: Union[Tuple[int, ...], int] = (1, 2, 3, 4),
             channel_mults: Tuple[int, ...] = (1, 2, 3, 4),
+            use_text_conditioning: bool = False,
     ) -> None:
         print_arch = print_arch if print_arch else self.print_arch
 
         image_channels = 3
         x = torch.randn(size=(n, image_channels, hw, hw), device=self.device)
         cond_embedding = torch.rand(size=(n, 1, 1, cond_embed_dim), device=self.device)
+        contextual_embedding = torch.rand(size=(n, 1, 1, contextual_text_embed_dim), device=self.device)
 
         model = EfficientUNet(
             in_channels=image_channels,
@@ -192,6 +195,8 @@ class Tester:
             channel_mults=channel_mults,
             num_resnet_blocks=num_resnet_blocks,
             use_attention=use_attention,
+            use_text_conditioning=use_text_conditioning,
+            contextual_text_embed_dim=contextual_text_embed_dim,
         ).to(self.device)
         print(f'Param count: {sum([p.numel() for p in model.parameters()])}')
 
@@ -201,6 +206,7 @@ class Tester:
         out = model(
             x=x,
             conditional_embedding=cond_embedding,
+            contextual_text_embedding=contextual_embedding,
         )
 
         print(f'In shape: {x.shape}, Out shape: {out.shape}')
@@ -225,7 +231,8 @@ if __name__ == '__main__':
         hw=128,
         cond_embed_dim=512,
         base_channel_dim=64,
-        channel_mults=(1, 1, 2, 3),
-        num_resnet_blocks=(2, 1, 1, 4),
+        channel_mults=(1, 1, 2, 3, 1),
+        num_resnet_blocks=(2, 1, 1, 3, 2),
         use_attention=True,
+        use_text_conditioning=True,
     )
