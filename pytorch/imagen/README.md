@@ -2,5 +2,6 @@
 
 ## Todo
 
-- Add cross attention.
-- Enable dblock self attention.
+- Add class conditioning.
+- Add diffusion process.
+- Add T5 embedding generator.
