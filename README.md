@@ -25,6 +25,8 @@ These codes should work. Reports for any bugs, mistakes welcome.
 |  |  |
 | **Multimodal** | [Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding (Imagen)](pytorch/imagen) |
 |  |  |
+| **Transformers, Attention Mechanisms** | :rocket: [Attention is all you need (Transformers, Self Attention, Multi-Head Self Attention)](pytorch/self-attention) |
+|  |  |
 | **Neural Style Transfer** | [Image Style Transfer Using Convolutional Neural Networks (NST)](pytorch/neural-style-transfer) |
 |  |  |
 | **Knowledge Distillation** | :rocket: [Distilling the Knowledge in a Neural Network (Knowledge Distillation)](pytorch/knowledge-distillation) |
