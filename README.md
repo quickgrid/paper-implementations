@@ -61,8 +61,4 @@ Various tools useful for custom training. These are not paper implementation.
 
 
 
-## Papers of Interest
-
-Papers links are available here, https://github.com/quickgrid/AI-Resources/blob/master/papers.md.
-
 
