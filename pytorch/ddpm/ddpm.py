@@ -55,6 +55,7 @@ class Diffusion:
 
         # Section 2, equation 4 and near explation for alpha, alpha hat, beta.
         self.beta = self.linear_noise_schedule()
+        # self.beta = self.cosine_beta_schedule()
         self.alpha = 1 - self.beta
         self.alpha_hat = torch.cumprod(self.alpha, dim=0)
 
@@ -76,6 +77,16 @@ class Diffusion:
         """
         return torch.linspace(start=self.beta_start, end=self.beta_end, steps=self.noise_steps, device=self.device)
 
+    def cosine_beta_schedule(self, s=0.008):
+        """Cosine schedule from annotated transformers.
+        """
+        steps = self.noise_steps + 1
+        x = torch.linspace(0, self.noise_steps, steps, device=self.device)
+        alphas_cumprod = torch.cos(((x / self.noise_steps) + s) / (1 + s) * torch.pi * 0.5) ** 2
+        alphas_cumprod = alphas_cumprod / alphas_cumprod[0]
+        betas = 1 - (alphas_cumprod[1:] / alphas_cumprod[:-1])
+        return torch.clip(betas, 0.0001, 0.9999)
+    
     def q_sample(self, x: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Section 3.2, algorithm 1 formula implementation. Forward process, defined by `q`.
 
@@ -217,19 +228,6 @@ class PositionalEncoding(nn.Module):
         pos_encoding[:, 0::2] = torch.sin(position * div_term)
         pos_encoding[:, 1::2] = torch.cos(position * div_term)
         self.register_buffer(name='pos_encoding', tensor=pos_encoding, persistent=False)
-
-    def forward_on_all(self, x: torch.Tensor) -> torch.Tensor:
-        """Adds positional embedding to all patches. Not used here.
-
-        Same positional embedding is applied to all images in batch. The precalculated positional
-        embedding values are summed with the given embedding vector.
-
-        Args:
-            x: Image patch embedding tensor. Shape [batch_size, patch_count, embedding_dim].
-        """
-        pos_encoding = self.pos_encoding.unsqueeze(0)
-        x = x + pos_encoding[:, : x.shape[1]]
-        return self.dropout(x)
 
     def forward(self, t: torch.LongTensor) -> torch.Tensor:
         """Get precalculated positional embedding at timestep t. Outputs same as video implementation
