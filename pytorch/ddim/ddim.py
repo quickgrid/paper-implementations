@@ -1,10 +1,8 @@
 """Implementation of DDIM.
 
-Diffusion method is based on keras DDIM implementation.
-
-References
+References:
     - Annotated DDPM implementation,
-        https://github.com/quickgrid/paper-implementations/tree/main/pytorch/ddpm.
+        https://github.com/quickgrid/paper-implementations/tree/main/pytorch/denoising-diffusion.
     - Keras DDIM,
         https://keras.io/examples/generative/ddim/.
 """
@@ -164,19 +162,6 @@ class PositionalEncoding(nn.Module):
         pos_encoding[:, 0::2] = torch.sin(position * div_term)
         pos_encoding[:, 1::2] = torch.cos(position * div_term)
         self.register_buffer(name='pos_encoding', tensor=pos_encoding, persistent=False)
-
-    def forward_on_all(self, x: torch.Tensor) -> torch.Tensor:
-        """Adds positional embedding to all patches. Not used here.
-
-        Same positional embedding is applied to all images in batch. The precalculated positional
-        embedding values are summed with the given embedding vector.
-
-        Args:
-            x: Image patch embedding tensor. Shape [batch_size, patch_count, embedding_dim].
-        """
-        pos_encoding = self.pos_encoding.unsqueeze(0)
-        x = x + pos_encoding[:, : x.shape[1]]
-        return self.dropout(x)
 
     def forward(self, t: torch.LongTensor) -> torch.Tensor:
         """Get precalculated positional embedding at timestep t. Outputs same as video implementation
@@ -344,7 +329,7 @@ class UNet(nn.Module):
 
         Args:
             x: Image tensor of shape, [batch_size, channels, height, width].
-            t: Time step defined as long integer. 
+            t: Time step defined as long integer.
         """
         t = self.pos_encoding(t)
 
@@ -445,7 +430,7 @@ class CustomImageClassDataset(Dataset):
         image = image.convert('RGB')
         return self.transform(image), class_label
 
-      
+
 class Utils:
     def __init__(self):
         super(Utils, self).__init__()
@@ -491,6 +476,7 @@ class Utils:
     def load_checkpoint(
             model: nn.Module,
             filename: str,
+            enable_train_mode: bool,
             optimizer: optim.Optimizer = None,
             scheduler: optim.lr_scheduler = None,
             grad_scaler: GradScaler = None,
@@ -498,16 +484,16 @@ class Utils:
         logging.info("=> Loading checkpoint")
         saved_model = torch.load(filename, map_location="cuda")
         model.load_state_dict(saved_model['state_dict'], strict=False)
-        if 'optimizer' in saved_model:
+        if 'optimizer' in saved_model and enable_train_mode:
             optimizer.load_state_dict(saved_model['optimizer'])
-        if 'scheduler' in saved_model:
+        if 'scheduler' in saved_model and enable_train_mode:
             scheduler.load_state_dict(saved_model['scheduler'])
-        if 'grad_scaler' in saved_model:
+        if 'grad_scaler' in saved_model and enable_train_mode:
             grad_scaler.load_state_dict(saved_model['grad_scaler'])
         return saved_model['epoch']
 
 
-class Trainer:
+class DDIM:
     def __init__(
             self,
             dataset_path: str,
@@ -527,6 +513,7 @@ class Trainer:
             save_every: int = 500,
             learning_rate: float = 2e-4,
             noise_steps: int = 500,
+            enable_train_mode: bool = True,
     ):
         self.num_epochs = num_epochs
         self.device = device
@@ -535,6 +522,7 @@ class Trainer:
         self.accumulation_iters = accumulation_iters
         self.sample_count = sample_count
         self.accumulation_batch_size = accumulation_batch_size
+        self.enable_train_mode = enable_train_mode
 
         base_path = save_path if save_path is not None else os.getcwd()
         self.save_path = os.path.join(base_path, run_name)
@@ -583,12 +571,14 @@ class Trainer:
                 scheduler=self.scheduler,
                 grad_scaler=self.grad_scaler,
                 filename=checkpoint_path,
+                enable_train_mode=enable_train_mode,
             )
         if checkpoint_path_ema:
             logging.info(f'Loading EMA model weights...')
             _ = Utils.load_checkpoint(
                 model=self.ema_model,
                 filename=checkpoint_path_ema,
+                enable_train_mode=enable_train_mode,
             )
 
     def sample(
@@ -662,6 +652,8 @@ class Trainer:
         )
 
     def train(self) -> None:
+        assert self.enable_train_mode, 'Cannot train when enable_train_mode flag disabled.'
+
         logging.info(f'Training started....')
         for epoch in range(self.start_epoch, self.num_epochs):
             accumulated_minibatch_loss = 0.0
@@ -677,8 +669,8 @@ class Trainer:
 
                     # sample uniform random diffusion times
                     diffusion_times = torch.rand(size=(current_batch_size, 1, 1, 1), device=self.device)
+
                     noise_rates, signal_rates = self.diffusion.diffusion_schedule(diffusion_times)
-                    
                     # mix the images with noises accordingly
                     noisy_images = signal_rates * real_images + noise_rates * noises
 
@@ -757,17 +749,18 @@ class Trainer:
 
 
 if __name__ == '__main__':
-    trainer = Trainer(
+    ddim = DDIM(
         dataset_path=r'C:\computer_vision\celeba',
         save_path=r'C:\computer_vision\ddim',
-        # checkpoint_path=r'C:\computer_vision\ddim\model_66_0.pt',
-        # checkpoint_path_ema=r'C:\computer_vision\ddim\model_ema_66_0.pt',
+        checkpoint_path=r'C:\computer_vision\ddim\ddim_celeba_66_0.pt',
+        checkpoint_path_ema=r'C:\computer_vision\ddim\ddim_celeba_ema_66_0.pt',
+        # enable_train_mode=False,
     )
-    trainer.train()
+    ddim.train()
 
-    # trainer.sample(output_name='output9', sample_count=2, diffusion_steps=40)
+    # ddim.sample(output_name='output9', sample_count=2, diffusion_steps=40)
 
-    # trainer.sample_gif(
+    # ddim.sample_gif(
     #     output_name='output8',
     #     sample_count=1,
     #     save_path=r'C:\computer_vision\ddim',
