@@ -2,11 +2,11 @@
 
 Implementation attempts of various AI papers in simple form etc for my learning purposes. These implementations are not meant to be exact and are categorized into a general section. 
 
-These codes should work. Reports for any bugs, mistakes welcome.
+**WARNING: Codes may be incomplete, will likely have bugs, mistakes. Reports for any bugs, mistakes welcome.** 
 
-**WARNING: Codes may be incomplete, will likely have bugs, mistakes.**
+:rocket: Represents I am fairly confident implementation works **(some things may not be same as defined in paper)** on custom dataset and at least part of it is close enough to proposed paper topic. 
 
-:rocket: Represents I am fairly confident implementation works **(some things may not be same as defined in paper)** on custom dataset and at least part of it is close enough to proposed paper topic. Also mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html).
+In newer codes mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) and [google python style guide](https://google.github.io/styleguide/pyguide.html). Old codes have poor coding conventions and quality.
 
 ## Pytorch
 
