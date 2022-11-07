@@ -1,1 +1,4 @@
 # ProGAN
+
+TODO:
+- Training code.
