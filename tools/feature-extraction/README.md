@@ -58,6 +58,7 @@ Uses openclip and mclip for image and its corresponding text caption feature ext
 - https://github.com/salesforce/LAVIS
 - https://github.com/salesforce/BLIP
 - https://github.com/mlfoundations/open_clip
+- https://github.com/mlfoundations/open_clip/blob/main/tests/test_inference_simple.py
 - https://github.com/FreddeFrallan/Multilingual-CLIP
 - https://github.com/FreddeFrallan/Multilingual-CLIP/blob/main/Multilingual_CLIP.ipynb
 - https://huggingface.co/M-CLIP/XLM-Roberta-Large-Vit-B-16Plus
