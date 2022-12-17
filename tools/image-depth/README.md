@@ -9,3 +9,4 @@ Generates depth image from single image using MiDaS.
 ## References
 
 - https://github.com/isl-org/MiDaS
+- https://pytorch.org/hub/intelisl_midas_v2/
