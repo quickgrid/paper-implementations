@@ -64,7 +64,7 @@ def generate_embedding(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Generate captions from images.')
+    parser = argparse.ArgumentParser(description='Generate embeddings from text captions.')
     parser.add_argument('-s', '--src', required=True, help="path to source caption folder", type=pathlib.Path)
     parser.add_argument('-d', '--dest', help="path to destination embedding folder", type=pathlib.Path)
     parser.add_argument('--device', help="use cpu or cuda gpu", default='cuda', type=str)
