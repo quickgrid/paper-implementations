@@ -18,7 +18,7 @@ Generates embedding in numpy array npy format from text. Requires transformers a
 
 > python t5_embedding.py --src "PATH_TO_CAPTION_TXT_FOLDER"
 
-## Equivalent Text and Image Features
+## Image and Text Caption Features
 
 ### lavis_blip_embedding.py
 
