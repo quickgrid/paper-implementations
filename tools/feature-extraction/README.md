@@ -1,6 +1,6 @@
 # Feature Extraction
 
-Any of the methods can be used to generate npy files used for training. 
+Any of the methods can be used to generate npy files used for training. [This paper](https://arxiv.org/abs/2211.01324) combines t5, clip text encoder and clip image encoder for optional image.
 
 ## Text Features
 
