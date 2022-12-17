@@ -40,15 +40,6 @@ In newer codes mostly tried to follow [PEP 8](https://www.python.org/dev/peps/pe
 |  |  |
 | **Implicit Representations** | [Implicit Neural Representations with Periodic Activation Functions (SIREN)](pytorch/siren) <br> [COIN: COmpression with Implicit Neural representations](pytorch/siren) |
 
-<!--
-## Keras
-
-| Topic | Code |
-| --- | --- |
-| **Object Detection** | [Focal Loss for Dense Object Detection (RetinaNet)](keras/retinanet) |
-|  |  |
--->
-
 
 ## Tools
 
@@ -58,7 +49,7 @@ Various tools useful for custom training. These are not paper implementation.
 | --- | --- |
 | **Image Resize, Verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](tools/image-verification/) |
 | **Image Captioning** | :rocket: [Image to text caption generation](tools/image-captioning/) |
-| **Text Embedding** | :rocket: [Text to embedding generation](tools/text-embedding/) |
+| **Embedding, Feature extraction** | :rocket: [Embedding Generation, Feature Extraction from text and images](tools/feature-extraction/) |
 |  |  |
 
 
