@@ -49,8 +49,8 @@ def generate_embedding(args: argparse.Namespace) -> None:
                 constant_values=0
             )
             embedding = np.squeeze(embedding, 0)
-
             np.save(os.path.join(embedding_output_path, f'embedding_{file_name}.npy'), embedding)
+            
             if args.attn_mask:
                 mask = mask.cpu().numpy()
                 mask = np.pad(
