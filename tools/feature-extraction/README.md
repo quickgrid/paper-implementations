@@ -4,6 +4,10 @@ Any of the methods can be used to generate npy files used for training. [This pa
 
 Chosen libraries in references must installed or cloned and run from correct path to work.
 
+## Todo: 
+
+- Reimplement as classes and dataset for using in both training precompute and inference time.
+
 ## View Embedding File
 
 ### npy_viewer.py
