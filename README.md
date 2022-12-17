@@ -57,7 +57,7 @@ Various tools useful for custom training. These are not paper implementation.
 | Topic | Code |
 | --- | --- |
 | **Image Resize, Verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](tools/image-verification/) |
-| **Image Captioning** | :rocket: [Image to text caption generation using various methods](tools/image-captioning/) |
+| **Image Captioning** | :rocket: [Image to text caption generation](tools/image-captioning/) |
 | **Text Embedding** | :rocket: [Text to embedding generation](tools/text-embedding/) |
 |  |  |
 
