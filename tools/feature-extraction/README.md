@@ -24,6 +24,11 @@ Uses albef from lavis library to extract features from image and its correspondi
 
 > python lavis_albef_embedding.py --src "PATH_TO_CAPTION_TXT_FOLDER"
 
+### blip_embedding.py
+
+Uses original BLIP to generate embedding from image and its corresponding text caption.
+
+> python blip_embedding.py --src "PATH_TO_CAPTION_TXT_FOLDER"
 
 ### openclip_embedding.py
 
