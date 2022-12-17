@@ -49,7 +49,7 @@ Various tools useful for custom training. These are not paper implementation.
 | --- | --- |
 | **Image Resize, Verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](tools/image-verification/) |
 | **Image Captioning** | :rocket: [Image to text caption generation](tools/image-captioning/) |
-| **Embedding, Feature extraction** | :rocket: [Embedding Generation, Feature Extraction from text and images](tools/feature-extraction/) |
+| **Embedding, Feature extraction** | :rocket: [Embedding Generation, Feature Extraction from Text and Images](tools/feature-extraction/) |
 |  |  |
 
 
