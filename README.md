@@ -50,6 +50,8 @@ Various tools useful for custom training. These are not paper implementation.
 | **Image Resize, Verification** | :rocket: [Fast full image dataset resize and corrupted, low resolution image remover](tools/image-verification/) |
 | **Image Captioning** | :rocket: [Image to text caption generation](tools/image-captioning/) |
 | **Embedding, Feature extraction** | :rocket: [Embedding Generation, Feature Extraction from Text and Images](tools/feature-extraction/) |
+| **Image Depth Generation** | [Generates depth images from single or multiple image](tools/image-depth/) |
+| **Image Segmentation Generation** | [Generates semantic, instance, panoptic etc. segmentation images from an image](tools/image-segmentation/) |
 |  |  |
 
 
