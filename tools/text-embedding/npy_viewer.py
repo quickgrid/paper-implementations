@@ -17,7 +17,7 @@ def view_npy(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Generate captions from images.')
+    parser = argparse.ArgumentParser(description='View numpy npy file data and shape.')
     parser.add_argument('-s', '--src', required=True, help="path to npy file", type=pathlib.Path)
     parser.add_argument('-d', '--dest', help="path to destination folder", type=pathlib.Path)
     parser.add_argument('--show', help="shows array values in npy file", action='store_true')
