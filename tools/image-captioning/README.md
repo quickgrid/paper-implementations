@@ -1,4 +1,4 @@
-## Usage
+# Image Caption Generation
 
 ### lavis_blip_captioning.py
 
