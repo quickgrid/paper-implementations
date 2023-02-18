@@ -43,24 +43,24 @@ def generate_embedding(args: argparse.Namespace) -> None:
                 embedding = out
 
             embedding = embedding.cpu().numpy()
-            if not args.no_pad:
-                embedding = np.pad(
-                    embedding,
-                    pad_width=((0, 0), (0, max_len - embedding.shape[1]), (0, 0)),
-                    mode='constant',
-                    constant_values=0
-                )
+            # if not args.no_pad:
+            #     embedding = np.pad(
+            #         embedding,
+            #         pad_width=((0, 0), (0, max_len - embedding.shape[1]), (0, 0)),
+            #         mode='constant',
+            #         constant_values=0
+            #     )
 
             np.save(os.path.join(embedding_output_path, f'embedding_{file_name}.npy'), embedding)
             if args.attn_mask:
                 mask = mask.cpu().numpy()
-                if not args.no_pad:
-                    mask = np.pad(
-                        mask,
-                        pad_width=((0, 0), (0, max_len - mask.shape[1])),
-                        mode='constant',
-                        constant_values=0
-                    )
+                # if not args.no_pad:
+                #     mask = np.pad(
+                #         mask,
+                #         pad_width=((0, 0), (0, max_len - mask.shape[1])),
+                #         mode='constant',
+                #         constant_values=0
+                #     )
                 np.save(os.path.join(mask_output_path, f'mask_{file_name}.npy'), mask)
 
 
@@ -71,7 +71,7 @@ def main() -> None:
     parser.add_argument('--device', help="use cpu or cuda gpu", default='cuda', type=str)
     parser.add_argument('--max-len', help="max tokenization length", default=96, type=int)
     parser.add_argument('--attn-mask', help="generate attention mask npy", action='store_true')
-    parser.add_argument('--no-pad', help="disables pad with 0 to match max-len size", action='store_true')
+    # parser.add_argument('--no-pad', help="disables pad with 0 to match max-len size", action='store_true')
     parser.add_argument(
         '--type', help='type t5 or t5 1.1', default='google/t5-v1_1', choices=['google/t5-v1_1', 't5']
     )
