@@ -1,106 +1,18 @@
 """Imagen implementation.
 
-TODO:
-    - Add gradient checkpoint for chosen modules.
-    - Convert to channel last format.
-
-Notes:
-    For super resolution authors remove self attention layers but keep cross attention layers as pointed out in
-    section 2.5.
-
 References:
     - Imagen paper, https://arxiv.org/abs/2205.11487.
     - Self Attention paper, https://arxiv.org/abs/1706.03762.
     - Vision Transformers paper, https://arxiv.org/pdf/2010.11929.pdf.
 """
+import math
 from typing import Tuple, Union
 
 import numpy as np
 import torch
 from torch import nn
 
-
-class TransformerEncoderSA(nn.Module):
-    def __init__(
-            self,
-            num_channels: int,
-            num_heads: int = 8,
-            hidden_dim: int = None,
-            dropout: int = 0.0,
-    ):
-        """A block of transformer encoder with mutli head self attention from vision transformers paper,
-        https://arxiv.org/pdf/2010.11929.pdf.
-        """
-        super(TransformerEncoderSA, self).__init__()
-
-        self.mha = nn.MultiheadAttention(embed_dim=num_channels, num_heads=num_heads, batch_first=True)
-        self.ln_1 = nn.LayerNorm([num_channels])
-        self.ln_2 = nn.LayerNorm([num_channels])
-
-        hidden_dim = hidden_dim if hidden_dim is not None else (num_channels * 2)
-        self.mlp = nn.Sequential(
-            nn.Linear(in_features=num_channels, out_features=hidden_dim),
-            nn.GELU(),
-            nn.Dropout(p=dropout),
-            nn.Linear(in_features=hidden_dim, out_features=num_channels),
-            nn.GELU(),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        b, c, h, w = x.shape
-        x = x.view(b, c, h * w).permute(0, 2, 1)
-        x_ln = self.ln_1(x)
-        attention_value, _ = self.mha(query=x_ln, key=x_ln, value=x_ln)
-        x = attention_value + x
-        x = self.mlp(self.ln_2(x)) + x
-        return x.permute(0, 2, 1).view(b, c, h, w)
-
-
-class TransformerEncoderCrossSA(nn.Module):
-    def __init__(
-            self,
-            num_channels: int,
-            num_heads: int = 8,
-            hidden_dim: int = None,
-            dropout: int = 0.0,
-    ):
-        """Transformer encoder block with self attention using context embedding added with previous input in
-         place of key, value and previous input as query.
-
-        Imagen paper, section D.3.1, mentions cross attention implemented by concatenating text embedding to
-        key, value a pair of each self attention layer. This is done for 64x64, 64x64 to 256x256. For 1024x1024
-        resolution explicit cross attention layer is added.
-
-        TODO: Verify if current method of adding cross attention usable or wrong.
-        """
-        super(TransformerEncoderCrossSA, self).__init__()
-
-        self.mha = nn.MultiheadAttention(embed_dim=num_channels, num_heads=num_heads, batch_first=True)
-        self.ln_1 = nn.LayerNorm([num_channels])
-        self.ln_2 = nn.LayerNorm([num_channels])
-
-        hidden_dim = hidden_dim if hidden_dim is not None else (num_channels * 2)
-        self.mlp = nn.Sequential(
-            nn.Linear(in_features=num_channels, out_features=hidden_dim),
-            nn.GELU(),
-            nn.Dropout(p=dropout),
-            nn.Linear(in_features=hidden_dim, out_features=num_channels),
-            nn.GELU(),
-        )
-
-    def forward(self, query: torch.Tensor, kv: torch.Tensor) -> torch.Tensor:
-        b, c, h, w = query.shape
-        x_kv = query + kv
-
-        x = query.view(b, c, h * w).permute(0, 2, 1)
-        x_ln = self.ln_1(x)
-        x_kv = x_kv.view(b, c, h * w).permute(0, 2, 1)
-        x_kv = self.ln_1(x_kv)
-
-        attention_value, _ = self.mha(query=x_ln, key=x_kv, value=x_kv)
-        x = attention_value + x
-        x = self.mlp(self.ln_2(x)) + x
-        return x.permute(0, 2, 1).view(b, c, h, w)
+from memory_efficient_attention import Attention
 
 
 class EfficientUNetResNetBlock(nn.Module):
@@ -160,8 +72,10 @@ class EfficientUNetDBlock(nn.Module):
         Args:
             out_channels: Current block expected output channels.
             num_resnet_blocks: Number of sequential resnet blocks in dblock between CombineEmbs and SelfAttention.
-            cond_embed_dim: Conditinal embeddings dimension like time, class, text embeddings.
-            contextual_text_embed_dim: Embedded text dimension for example, T5 output with 1024 in channel dimension.
+            cond_embed_dim: Conditinal embeddings dimension like time, class, pooled text embeddings in
+                shape of (batch_size, embed_dim).
+            contextual_text_embed_dim: Per token text embedding from pretrain language model in
+                shape (batch_size, seq_size, embed_dim).
             stride: With (1, 1) output has same h, w as input with shape of (batch_size, out_channel, h, w).
                 With stride of (2, 2) downsamples tensor as (batch_size, out_channel, h / 2, w / 2).
             use_text_conditioning: Cross Self Attention with text embedding is used for text to image.
@@ -185,16 +99,27 @@ class EfficientUNetDBlock(nn.Module):
             )
 
         if use_text_conditioning:
-            self.transformer_encoder_cross_sa = TransformerEncoderCrossSA(num_channels=out_channels)
             self.contextual_text_embedding_layer = nn.Sequential(
                 nn.Linear(in_features=contextual_text_embed_dim, out_features=out_channels)
             )
+
+        self.mem_efficient_attn = Attention(
+            dim=out_channels,
+            dim_head=64,  # dimension per head
+            heads=8,  # number of attention heads
+            causal=True,  # autoregressive or not
+            memory_efficient=True,
+            # whether to use memory efficient attention (can be turned off to test against normal attention)
+            q_bucket_size=1024,  # bucket size along queries dimension
+            k_bucket_size=2048  # bucket size along key / values dimension
+        )
 
     def forward(
             self,
             x: torch.Tensor,
             conditional_embedding: torch.Tensor,
             contextual_text_embedding: torch.Tensor = None,
+            contextual_text_mask_embedding: torch.Tensor = None,
     ) -> torch.Tensor:
         """DBlock, initial conv (optional) -> combine embs -> resnet blocks -> self attention (optional).
 
@@ -215,21 +140,23 @@ class EfficientUNetDBlock(nn.Module):
 
         Args:
             x: Previous DBlock output.
-            conditional_embedding: Time, class, pooled text embedding. Example shape, (batch, 1, 1, 256).
+            conditional_embedding: Time, class, pooled text embedding. Example shape, (batch, embedding_dim).
             contextual_text_embedding: Contextual text embedding from pretrained model like T5. Example shape,
-                (batch, 1, 1, 1024).
+                (batch, token_size, embedding_dim).
+            contextual_text_mask_embedding: Mask generated by model in shape (batch, token_size).
         """
         x = self.initial_conv(x) if self.use_conv else x
         cond_embed = self.conditional_embedding_layer(conditional_embedding)
-        cond_embed = cond_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
+        cond_embed = cond_embed.view(cond_embed.shape[0], cond_embed.shape[1], 1, 1).repeat(1, 1, x.shape[2], x.shape[3])
         x = x + cond_embed
         x = self.resnet_blocks(x)
 
         if self.use_text_conditioning:
             context_text_embed = self.contextual_text_embedding_layer(contextual_text_embedding)
-            context_text_embed = context_text_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
-            # x = x + context_text_embed
-            x = self.transformer_encoder_cross_sa(query=x, kv=context_text_embed)
+            b, c, h, w = x.shape
+            x = x.view(b, c, h * w).permute(0, 2, 1)
+            x = self.mem_efficient_attn(x=x, context=context_text_embed, mask=contextual_text_mask_embedding)
+            x = x.permute(0, 2, 1).view(b, c, h, w)
 
         return x
 
@@ -268,7 +195,16 @@ class EfficientUNetUBlock(nn.Module):
             )
 
         if use_attention:
-            self.transformer_encoder_sa = TransformerEncoderSA(num_channels=out_channels)
+            self.mem_efficient_attn = Attention(
+                dim=out_channels,
+                dim_head=64,  # dimension per head
+                heads=8,  # number of attention heads
+                causal=True,  # autoregressive or not
+                memory_efficient=True,
+                # whether to use memory efficient attention (can be turned off to test against normal attention)
+                q_bucket_size=1024,  # bucket size along queries dimension
+                k_bucket_size=2048  # bucket size along key / values dimension
+            )
 
         self.last_conv_upsampler = nn.Sequential(
             nn.Conv2d(
@@ -289,13 +225,20 @@ class EfficientUNetUBlock(nn.Module):
             conditional_embedding: Time, class, pooled Text embeddings.
         """
         cond_embed = self.conditional_embedding_layer(conditional_embedding)
-        cond_embed = cond_embed.permute(0, 3, 1, 2).repeat(1, 1, x.shape[-2], x.shape[-1])
+        cond_embed = cond_embed.view(cond_embed.shape[0], cond_embed.shape[1], 1, 1).repeat(1, 1, x.shape[2], x.shape[3])
         x = self.input_embedding_layer(x)
-
         x = x + cond_embed
         x = self.resnet_blocks(x)
-        x = self.transformer_encoder_sa(x) if self.use_attention else x
-        x = self.last_conv_upsampler(x) if self.use_conv else x
+
+        if self.use_attention:
+            b, c, h, w = x.shape
+            x = x.view(b, c, h * w).permute(0, 2, 1)
+            x = self.mem_efficient_attn(x)
+            x = x.permute(0, 2, 1).view(b, c, h, w)
+
+        if self.use_conv:
+            x = self.last_conv_upsampler(x)
+
         return x
 
 
@@ -335,7 +278,7 @@ class EfficientUNet(nn.Module):
             num_resnet_blocks = 3
 
         if isinstance(num_resnet_blocks, int):
-            num_resnet_blocks = (num_resnet_blocks, ) * len(channel_mults)
+            num_resnet_blocks = (num_resnet_blocks,) * len(channel_mults)
 
         assert len(channel_mults) == len(num_resnet_blocks), 'channel_mults and num_resnet_blocks should be same shape.'
 
@@ -397,6 +340,7 @@ class EfficientUNet(nn.Module):
             x: torch.Tensor,
             conditional_embedding: torch.Tensor,
             contextual_text_embedding: torch.Tensor = None,
+            contextual_text_mask_embedding: torch.Tensor = None,
     ) -> torch.Tensor:
         """Efficient UNet forward for given number of unet blocks.
 
@@ -406,7 +350,7 @@ class EfficientUNet(nn.Module):
 
         x_skip_outputs = []
         for dblock in self.dblocks:
-            x = dblock(x, conditional_embedding, contextual_text_embedding)
+            x = dblock(x, conditional_embedding, contextual_text_embedding, contextual_text_mask_embedding)
             x_skip_outputs.append(x)
 
         x_skip_outputs.pop()
@@ -418,3 +362,4 @@ class EfficientUNet(nn.Module):
 
         x = self.image_projection(x)
         return x
+
