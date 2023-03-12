@@ -5,14 +5,51 @@ imported into other modules.
 
 References:
     - Transformers, Self Attention paper, https://arxiv.org/abs/1706.03762.
+    - http://nlp.seas.harvard.edu/annotated-transformer/
 """
+import math
 
 import torch
 from torch import nn
 from torch.functional import F
 
 
-class MultiHeadSelfAttention(nn.Module):
+class ScaledDotProductAttention(nn.Module):
+    def __init__(self, dropout: float = 0.1):
+        super(ScaledDotProductAttention, self).__init__()
+        self.dropout = dropout
+
+    def forward(
+            self,
+            query: torch.Tensor,
+            key: torch.Tensor,
+            value: torch.Tensor,
+            mask: torch.Tensor = None,
+    ) -> [torch.Tensor, torch.Tensor]:
+        """Implementation of figure 2 and equation 1. In section 3.2.3 masking is acheived by setting it to -inf.
+        Here, -1e9 is used.
+
+        Args:
+            query: Shape of (batch, num_tokens, query_dim).
+            key:
+            value:
+            mask:
+        """
+        d_k = key.shape[-1]
+        scores = torch.matmul(query, key.transpose(-2, -1))
+        scaled_scores = scores / math.sqrt(d_k)
+
+        if mask is not None:
+            scaled_scores.masked_fill(mask == 0, -1e9)
+
+        attention = F.softmax(scaled_scores, dim=-1)
+        attention = F.dropout(attention, p=self.dropout)
+
+        output = torch.matmul(attention, value)
+        return output, attention
+
+
+class MultiHeadSelfAttentionFused(nn.Module):
     def __init__(
             self,
             embed_dim: int,
@@ -38,7 +75,7 @@ class MultiHeadSelfAttention(nn.Module):
             head_dim: Dimension per head.
             dropout: Dropout applied to attention.
         """
-        super(MultiHeadSelfAttention, self).__init__()
+        super(MultiHeadSelfAttentionFused, self).__init__()
         self.dropout = dropout
         hidden_dim = num_heads * head_dim
         context_dim = context_dim if context_dim is not None else embed_dim
@@ -73,20 +110,23 @@ class TransformerEncoderCustomSA(nn.Module):
             hidden_dim: int = None,
             dropout: int = 0.0,
     ):
-        """A custom implementation of transformer encoder with usage of custom multihead self attention.
+        """A custom implementation of transformer encoder with usage of custom multihead self attention. Layer norm
+        is applied before MHA and feed forward as prenorm.
+
+        Second layer norm is merged feed forward.
         """
         super(TransformerEncoderCustomSA, self).__init__()
 
         per_head_dim = num_channels // num_heads
-        self.mha = MultiHeadSelfAttention(
+        self.mha = MultiHeadSelfAttentionFused(
             embed_dim=num_channels, num_heads=num_heads, head_dim=per_head_dim, bias=True,
         )
 
-        self.ln_1 = nn.LayerNorm([num_channels])
-        self.ln_2 = nn.LayerNorm([num_channels])
+        self.ln = nn.LayerNorm([num_channels])
 
         hidden_dim = hidden_dim if hidden_dim is not None else (num_channels * 2)
         self.mlp = nn.Sequential(
+            nn.LayerNorm([num_channels]),
             nn.Linear(in_features=num_channels, out_features=hidden_dim),
             nn.GELU(),
             nn.Dropout(p=dropout),
@@ -97,10 +137,10 @@ class TransformerEncoderCustomSA(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         b, c, h, w = x.shape
         x = x.view(b, c, h * w).permute(0, 2, 1)
-        x_ln = self.ln_1(x)
+        x_ln = self.ln(x)
         attention_value = self.mha(query=x_ln, key=x_ln, value=x_ln)
         x = attention_value + x
-        x = self.mlp(self.ln_2(x)) + x
+        x = self.mlp(x) + x
         return x.permute(0, 2, 1).view(b, c, h, w)
 
 
@@ -118,11 +158,11 @@ class TransformerEncoderSA(nn.Module):
         super(TransformerEncoderSA, self).__init__()
 
         self.mha = nn.MultiheadAttention(embed_dim=num_channels, num_heads=num_heads, batch_first=True)
-        self.ln_1 = nn.LayerNorm([num_channels])
-        self.ln_2 = nn.LayerNorm([num_channels])
+        self.ln = nn.LayerNorm([num_channels])
 
         hidden_dim = hidden_dim if hidden_dim is not None else (num_channels * 2)
         self.mlp = nn.Sequential(
+            nn.LayerNorm([num_channels]),
             nn.Linear(in_features=num_channels, out_features=hidden_dim),
             nn.GELU(),
             nn.Dropout(p=dropout),
@@ -133,8 +173,8 @@ class TransformerEncoderSA(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         b, c, h, w = x.shape
         x = x.view(b, c, h * w).permute(0, 2, 1)
-        x_ln = self.ln_1(x)
+        x_ln = self.ln(x)
         attention_value, _ = self.mha(query=x_ln, key=x_ln, value=x_ln)
         x = attention_value + x
-        x = self.mlp(self.ln_2(x)) + x
+        x = self.mlp(x) + x
         return x.permute(0, 2, 1).view(b, c, h, w)
